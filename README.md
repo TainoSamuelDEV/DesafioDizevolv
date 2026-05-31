@@ -89,7 +89,7 @@ A interface do **Project Pulse** foi reprojetada do zero sob o design system **P
 A paleta de cores primária e secundária da aplicação foi totalmente abstraída em variáveis nativas do CSS no arquivo [globals.css](file:///c:/Users/Admin/Documents/Dizevolv/frontend/src/app/globals.css):
 ```css
 :root {
-  --primary: #FD520A;          /* Laranja vibrante tech padrão */
+  --primary: #FD520A;          /* Laranja vibrante Dizevolv padrão */
   --primary-hover: #FD520A;
   --primary-glow: rgba(253, 82, 10, 0.08);
 }
@@ -124,18 +124,13 @@ No cabeçalho do painel, os gestores contam com uma visão estatística resumida
 
 ## ⚡ A Engine do Motor de Criticidade (`status_critico`)
 
-Para auxiliar na tomada de decisão estratégica de forma direta, o Backend BFF analisa as tarefas retornadas do ClickUp e injeta o campo `status_critico = true` de forma automatizada caso cumpra qualquer uma das regras:
+Para auxiliar na tomada de decisão estratégica de forma direta, o Backend analisa as tarefas retornadas do ClickUp e injeta o campo `status_critico = true` de forma automatizada caso cumpra qualquer uma das regras:
 
 1. **Urgência Crítica:** A prioridade da tarefa é estritamente **"urgent"**.
 2. **Estagnação Operacional:** A propriedade `date_updated` indica que a tarefa está **sem modificações ou interações há mais de 3 dias** em relação à data atual do servidor (`Date.now() - date_updated > 259.200.000 ms`).
 
 Isso fornece um relatório instantâneo de quais demandas precisam de intervenção da liderança sem sobrecarregar o gestor com análises manuais de relatórios.
 
----
-
-## 📄 Licença e Uso
-
-Este repositório é de uso interno da **Dizevolv Tech** e de seus parceiros de engenharia de software para o fomento de monitoramento operacional de alta performance.
 
 ---
-*Desenvolvido com foco em UI/UX Premium, Agilidade de Entrega e Robusteza Arquitetural. ⚡*
+*Desenvolvido com foco em UI/UX, Agilidade de Entrega e Robusteza Arquitetural. ⚡*
