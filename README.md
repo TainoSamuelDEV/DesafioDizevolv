@@ -122,7 +122,7 @@ No cabeçalho do painel, os gestores contam com uma visão estatística resumida
 
 ### 🧩 7. Integração & Acordeão de Subtarefas
 O dashboard agora suporta o desdobramento de demandas complexas em subtarefas:
-- **Agrupamento Automático:** O Backend BFF busca tanto tarefas quanto subtarefas de forma simultânea via API do ClickUp (`&subtasks=true`), organizando as subtasks dentro de seus respectivos cartões-pai antes de enviar ao frontend.
+- **Agrupamento Automático:** O Backend busca tanto tarefas quanto subtarefas de forma simultânea via API do ClickUp (`&subtasks=true`), organizando as subtasks dentro de seus respectivos cartões-pai antes de enviar ao frontend.
 - **Visualização Condicional Expandida:** Cartões com subtarefas exibem uma seção expansível com ícone de camadas e um contador. Ao clicar no cartão (ou no botão expansor), a seção se abre com uma animação elegante.
 - **Detalhes Completos:** Exibe o título de cada subtarefa com indicador visual de status concluído ou não (ícone e tachado) e sua respectiva prioridade mapeada e colorida.
 
