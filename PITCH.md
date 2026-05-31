@@ -37,24 +37,23 @@ Este documento consolida a estrutura e os argumentos do **Pitch de Apresentaçã
 
 ---
 
-### 🛠️ Slide 4: Arquitetura Segura (BFF Pattern)
-#### Engenharia Robusta nos Bastidores
-- **Padrão BFF (Backend For Frontend):** Node.js/Express atuando como intermediário blindado.
-- **Vantagens de Engenharia:**
-  - **Segurança Total:** Tokens oficiais do ClickUp isolados no servidor. Chaves jamais trafegam no cliente.
-  - **Cache Resiliente (5 min):** Camada de armazenamento em memória local que protege contra rate limits da API.
-  - **Auto-Resiliência:** Chaves de API vazias? O servidor aciona automaticamente o Modo Mock para manter o painel operacional.
-  - **Agrupamento de Subtasks:** Backend busca e agrupa subtarefas sob seus respectivos pais, diminuindo processamento no cliente.
+### 🛠️ Slide 4: BFF: Consultas & UI (3. DEVELOP)
+#### Estrutura do Backend e Reflexo Direto no Frontend
+- **Padrão BFF (Backend For Frontend):** Servidor Express.js que encapsula chaves privadas, realiza cache local de 5 minutos e desduplica/agrupa dados.
+- **Estrutura das Consultas de API:**
+  - **Primeira Consulta (Estrutural):** Realiza `GET /list/{list_id}` trazendo nomes do Espaço, Pasta/Projeto, Lista e os Statuses configurados com suas cores hexadecimais nativas.
+    - *Reflexo no Frontend:* Renderiza os breadcrumbs executivos e injeta dinamicamente as cores originais do ClickUp nos cabeçalhos das colunas Kanban e badges.
+  - **Segunda Consulta (Operacional):** Realiza `GET /list/{list_id}/task?include_closed=true&subtasks=true` capturando nome, status, prioridade, atualização, prazos, avatares e descrições.
+    - *Reflexo no Frontend:* Alimenta a distribuição dos cards, calcula a taxa de conclusão e progressão no topo e preenche a lista animada de subtarefas.
 
 ---
 
-### 🎨 Slide 5: Refinamentos UI/UX de Alta Fidelidade
-#### A Diferença está nos Detalhes
-- **Customização Rápida de Marca:** Cor primária ajustada via variáveis de CSS nativas (Tech Orange Dizevolv `#FD520A`).
-- **Dark Mode Sem Vazamentos:** Variante Tailwind customizada (@custom-variant dark) que corrige conflitos de SO no Tailwind v4.
-- **Border-Spin Glow Neon:** Efeito rotativo neon vermelho ao redor de cartões críticos. O brilho desliga sozinho ao mover para "Concluído" (Done).
-- **Acordeão de Subtarefas:** Expansão de altura animada dinamicamente com CSS Grid Row (`grid-rows-[0fr]` para `grid-rows-[1fr]`), com sinalização visual de conclusão e tags de prioridade em português.
-- **Sincronização de Cores Nativas:** Status do Kanban pintados dinamicamente com a paleta original extraída do ClickUp.
+### 🚀 Slide 5: 4. DELIVER (Entregáveis de Alta Fidelidade)
+#### Solução Pronta, Segura e Escalável para Produção
+- **BFF Auto-Resiliente (Segurança & Cache):** Servidor Express.js isola chaves privadas de API, provê cache de 5 minutos e desduplica requisições da API ClickUp para evitar rate limit.
+- **Painel Executivo Phoenix Flow (UI/UX Premium):** Kanban translúcido em glassmorphism com sincronização nativa de cores e visualização consolidada de métricas no topo.
+- **Engenharia de Micro-Interações:** Efeito Border-Spin Glow cônico rotativo ativo em cards críticos (desativado automaticamente ao ir para Done) e Acordeão de Subtarefas com abertura animada e suave acelerada por hardware (CSS Grid transitions).
+- **Setup e Execução Sem Atrito (Zero Fricção):** Inicialização mono-repositório instantânea com um único comando na raiz (`npm run dev`) e fallback automático e resiliente para o Modo Mock caso o token do ClickUp não esteja configurado.
 
 ---
 

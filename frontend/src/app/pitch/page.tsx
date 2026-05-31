@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Sparkles, 
-  Shield, 
-  Zap, 
-  ArrowRight, 
-  Layers, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Shield,
+  Zap,
+  ArrowRight,
+  Layers,
   Database,
   Cpu,
   Lock,
@@ -23,6 +23,7 @@ interface SlideData {
   bullets: string[];
   accentText: string;
   badge: string;
+  image?: string;
 }
 
 export default function PitchDeck() {
@@ -31,69 +32,69 @@ export default function PitchDeck() {
 
   const slides: SlideData[] = [
     {
-      badge: "MÉTODO",
+      badge: "INÍCIO",
       title: "Project Pulse",
       subtitle: "A Saúde Operacional da sua Empresa em Tempo Real",
       icon: <Sparkles className="w-12 h-12 text-[#FD520A] animate-pulse" />,
       bullets: [
         "Dashboard Executivo de Alta Fidelidade visual projetado sob medida.",
-        "Desenvolvido em 4 pilares: Discovery ➡️ Define ➡️ Develop ➡️ Deliver.",
-        "Informação instantânea e inteligência consultiva para diretores e CTOs."
+        "Informação instantânea e inteligência consultiva para diretores e CTOs.",
+        "Desenvolvido em 4 pilares: Discovery ➡️ Define ➡️ Develop ➡️ Deliver."
+        
       ],
       accentText: "A Dizevolv Tech transforma a frustração corporativa em software de alta performance."
     },
     {
       badge: "1. DISCOVERY",
-      title: "O Gargalo Oculto",
+      title: "O Problema",
       subtitle: "As Dores Silenciosas da Gestão de Demandas",
       icon: <Layers className="w-12 h-12 text-[#FD520A]" />,
       bullets: [
-        "Inatividade Invisível: Demandas estagnadas há mais de 3 dias sem qualquer interação da equipe.",
-        "Sobrecarga de Gestão: Líderes perdendo horas em planilhas densas para identificar gargalos operacionais.",
+        "Sobrecarga de Gestão: Líderes perdendo tempo em listas pouco visuais para identificar gargalos operacionais.",
         "Vazamento de Chaves: Projetos expondo tokens de API e credenciais confidenciais no cliente (frontend).",
-        "Rate Limiting Severo: Consultas repetitivas estourando limites de conexões e derrubando integrações."
       ],
-      accentText: "A dor do negócio mapeada e tratada de forma cirúrgica antes de iniciar o código."
+      accentText: "A dor do negócio mapeada e tratada de forma cirúrgica antes de iniciar o código.",
+      image: "clickup-list.png"
     },
     {
       badge: "2. DEFINE",
       title: "Project Pulse Dashboard",
-      subtitle: "Fluidez Visual com o Design Phoenix Flow",
+      subtitle: "Fluidez Visual",
       icon: <Cpu className="w-12 h-12 text-[#FD520A]" />,
       bullets: [
         "Visual Glassmorphic: Colunas Kanban translúcidas com efeito jateado (backdrop-blur-md) de alta sofisticação.",
         "Sprint Metrics Bar: Resumo numérico no topo (Tarefas, Gargalos, Entregues) e barra de progresso horizontal dinâmica.",
-        "Taxa de Entrega Dinâmica: Percentual geral de conclusão recalculado em tempo real.",
         "Filtros Rápidos Executivos: Busca instantânea por título, descrição ou membro responsável designado."
       ],
       accentText: "Inteligência, elegância corporativa e usabilidade de alto contraste em um único lugar."
     },
     {
       badge: "3. DEVELOP",
-      title: "Arquitetura Segura BFF",
-      subtitle: "Blindagem e Resiliência sob Padrão BFF (Express.js)",
+      title: "Backend: Consultas & UI",
+      subtitle: "Estrutura do Backend e Reflexo Direto no Frontend",
       icon: <Lock className="w-12 h-12 text-[#FD520A]" />,
       bullets: [
-        "Token Privado ClickUp Isolado: Credenciais oficiais protegidas no backend. Segurança absoluta contra vazamentos.",
-        "Cache BFF de 5 Minutos: Mitiga Rate Limiting armazenando dados de forma segura na memória do servidor.",
-        "Modo Mock Auto-Resiliente: Fallback inteligente que aciona o simulador autônomo caso as chaves estejam em branco no .env.",
-        "Agrupamento de Subtasks: Backend agrupa subtarefas sob seus respectivos pais, otimizando o processamento."
+        "Proteção e Desempenho: Servidor Express centraliza o token de autenticação ClickUp.",
+        "Primeira Consulta (Dados Estruturais): Busca as configurações da lista (GET /list/{id}) retornando os nomes do Espaço, Pasta/Projeto, Lista e Statuses configurados com suas cores originais.",
+        "Reflexo Estrutural na UI: O frontend consome esses dados dinâmicos e usa as cores nativas do ClickUp nos marcadores verticais e cabeçalhos de coluna.",
+        "Segunda Consulta (Dados Operacionais): Busca todas as demandas (GET /list/{id}/task?include_closed=true&subtasks=true) retornando nome, status, prioridade, prazos, responsáveis e descrição.",
+        "Reflexo Operacional na UI: Distribui os cards nas colunas correspondentes do Kanban, calcula o progresso de entregas da sprint no topo, e popula a lista expansível de subtarefas."
       ],
-      accentText: "Conectividade segura com ClickUp API e estabilidade robusta sob qualquer escala de dados."
+      accentText: "Uma engenharia limpa que realiza agregação lógica e segurança de dados em uma única transação.",
+       image: "clickup-path.png"
     },
     {
       badge: "4. DELIVER",
-      title: "Micro-interações de Alta Fidelidade",
-      subtitle: "A Diferença de Soluções com Valor de Marca",
+      title: "Entregáveis de Alta Fidelidade",
+      subtitle: "Solução Pronta, Segura e Escalável para Produção",
       icon: <Zap className="w-12 h-12 text-[#FD520A]" />,
       bullets: [
-        "Border-Spin Glow: Borda neon em rotação contínua nos cartões críticos. Desativa sozinha quando a tarefa é movida para Concluído.",
-        "Customização de Marca: Cores totalmente mapeadas em variáveis de CSS nativas (Tech Orange #FD520A).",
-        "Dark Mode à Prova de Bugs: Regra Tailwind @custom-variant dark que impede preferências do SO de afetarem a UI.",
-        "Acordeão de Subtarefas com Grid Animação: Transição de altura hardware-accelerated (grid-rows-[0fr] a [1fr]).",
-        "Cores do ClickUp Integradas: Cores de status de colunas pintadas de acordo com as chaves oficiais da lista."
+        "BFF Auto-Resiliente (Segurança & Cache): Servidor Express.js isola chaves privadas, provê cache de 5 minutos e desduplica requisições da API ClickUp.",
+        "Painel Executivo Phoenix Flow (UI/UX Premium): Kanban translúcido em glassmorphism com sincronização nativa de cores e progresso real-time.",
+        "Engenharia de Micro-Interações: Efeito Border-Spin Glow ativo em cards críticos (desativado na coluna Done) e Acordeão de Subtarefas com abertura suave por hardware.",
+        "Setup Sem Fricção (Zero Fricção): Inicialização mono-repositório instantânea com único comando (npm run dev) e fallback automático para Modo Mock."
       ],
-      accentText: "Uma experiência de usuário que gera orgulho e destaca o software de soluções comuns de mercado."
+      accentText: "Uma entrega de engenharia robusta e de alta fidelidade visual, pronta para implantação imediata."
     },
     {
       badge: "PRÓXIMOS PASSOS",
@@ -138,7 +139,7 @@ export default function PitchDeck() {
   const slide = slides[currentSlide];
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#111111] text-white flex flex-col justify-between p-6 md:p-7 relative overflow-hidden font-sans">
       {/* Background Radiantes Sutis */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#FD520A]/[0.05] rounded-full blur-[150px]"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#FD520A]/[0.02] rounded-full blur-[150px]"></div>
@@ -152,7 +153,7 @@ export default function PitchDeck() {
           <span className="text-xs font-semibold text-white/50 tracking-widest uppercase">
             PITCH DE APRESENTAÇÃO
           </span>
-          <Link 
+          <Link
             href="/"
             className="flex items-center gap-1.5 bg-[#FD520A] hover:bg-[#FD520A]/90 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-lg cursor-pointer"
           >
@@ -193,25 +194,47 @@ export default function PitchDeck() {
             </ul>
           </div>
 
-          {/* Direita: Elemento de Destaque / Caixa Visual */}
-          <div className="md:col-span-5 flex items-center justify-center">
-            <div className="w-full max-w-[340px] aspect-square rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-[#FD520A]/30 transition-all duration-300">
-              {/* Glow circular de fundo */}
-              <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-[#FD520A]/[0.08] rounded-full blur-[40px] group-hover:bg-[#FD520A]/[0.15] transition-all duration-300"></div>
-
-              {/* Ícone */}
-              <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit shadow-inner">
-                {slide.icon}
+          {/* Direita: Elemento de Destaque / Caixa Visual ou Imagem */}
+          <div className="md:col-span-5 flex items-center justify-center w-full">
+            {slide.image ? (
+              <div className="w-full max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md p-4 flex flex-col gap-4 shadow-2xl relative overflow-hidden group hover:border-[#FD520A]/30 transition-all duration-300">
+                <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden border border-white/[0.06]">
+                  <img
+                    src={slide.image}
+                    className="w-full h-full object-cover object-left-top hover:scale-[1.05] transition-transform duration-500"
+                    alt="ClickUp Complexity"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                  <div className="absolute bottom-2.5 left-3 text-[10px] font-bold text-white/90 bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm border border-white/10 uppercase tracking-widest">
+                    LISTA CLICKUP PADRÃO
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="w-8 h-1 bg-[#FD520A] rounded-full"></div>
+                  <p className="text-[11px] font-semibold text-white/80 italic leading-relaxed">
+                    "{slide.accentText}"
+                  </p>
+                </div>
               </div>
+            ) : (
+              <div className="w-full max-w-[340px] aspect-square rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-[#FD520A]/30 transition-all duration-300">
+                {/* Glow circular de fundo */}
+                <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-[#FD520A]/[0.08] rounded-full blur-[40px] group-hover:bg-[#FD520A]/[0.15] transition-all duration-300"></div>
 
-              {/* Accent Text */}
-              <div className="space-y-2 relative z-10">
-                <div className="w-8 h-1 bg-[#FD520A] rounded-full"></div>
-                <p className="text-sm font-semibold text-white/80 leading-relaxed italic">
-                  "{slide.accentText}"
-                </p>
+                {/* Ícone */}
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] w-fit shadow-inner">
+                  {slide.icon}
+                </div>
+
+                {/* Accent Text */}
+                <div className="space-y-2 relative z-10">
+                  <div className="w-8 h-1 bg-[#FD520A] rounded-full"></div>
+                  <p className="text-sm font-semibold text-white/80 leading-relaxed italic">
+                    "{slide.accentText}"
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>
@@ -225,15 +248,14 @@ export default function PitchDeck() {
           </span>
           <div className="flex gap-1.5">
             {slides.map((_, idx) => (
-              <button 
+              <button
                 key={idx}
                 onClick={() => {
                   setDirection(idx > currentSlide ? "next" : "prev");
                   setCurrentSlide(idx);
                 }}
-                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  idx === currentSlide ? "w-6 bg-[#FD520A]" : "w-1.5 bg-white/20 hover:bg-white/45"
-                }`}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${idx === currentSlide ? "w-6 bg-[#FD520A]" : "w-1.5 bg-white/20 hover:bg-white/45"
+                  }`}
               />
             ))}
           </div>
@@ -246,15 +268,15 @@ export default function PitchDeck() {
 
         {/* Botões do Slide */}
         <div className="flex items-center gap-3 shrink-0">
-          <button 
+          <button
             onClick={handlePrev}
             className="flex items-center justify-center p-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.08] hover:border-white/[0.12] transition cursor-pointer shadow-md"
             title="Slide anterior"
           >
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          
-          <button 
+
+          <button
             onClick={handleNext}
             className="flex items-center justify-center p-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.08] hover:border-white/[0.12] transition cursor-pointer shadow-md"
             title="Próximo slide"
