@@ -14,7 +14,7 @@ A aplicação é dividida em dois microsserviços desacoplados e otimizados:
    - **Framework:** Next.js 14 (App Router) + TypeScript.
    - **Styling:** Tailwind CSS integrado a variáveis CSS puras e dinâmicas.
    - **UI/UX Premium:** Design de alta fidelidade com visual translúcido (*glassmorphic*), micro-animações, estados de carregamento elegantes (*Skeleton Screens*), modo escuro sob demanda e adaptabilidade de cores nativas do ClickUp.
-2. **Backend BFF (`/backend`):** 
+2. **Backend (`/backend`):** 
    - **Framework:** Node.js puro com **Express.js**.
    - **Segurança:** Isolação completa de tokens de API. Nenhuma chave do ClickUp é exposta ao cliente final.
    - **Performance:** Camada de cache em memória temporária de 5 minutos, reduzindo drasticamente o consumo de cotas de API e mitigando bloqueios por *Rate Limits*.
@@ -55,7 +55,7 @@ Rode tudo a partir da raiz do repositório, em um único terminal:
    ```bash
    npm run dev
    ```
-   > ⚡ Este comando utiliza o utilitário `concurrently` para subir simultaneamente o **Backend BFF** (na porta `3001`) e o **Frontend Next.js** (na porta `3000`) com logs unificados e coloridos.
+   > ⚡ Este comando utiliza o utilitário `concurrently` para subir simultaneamente o **Backend** (na porta `3001`) e o **Frontend Next.js** (na porta `3000`) com logs unificados e coloridos.
 
 ---
 
