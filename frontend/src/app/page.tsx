@@ -126,7 +126,7 @@ export default function Dashboard() {
       } catch (err: any) {
         console.error("Erro ao conectar no BFF:", err);
         setError(
-          "Não foi possível conectar ao servidor BFF. Verifique se o backend está ativo na porta 3001."
+          "Não foi possível conectar ao servidor. Verifique se o backend está ativo na porta 3001."
         );
       } finally {
         setLoading(false);
@@ -274,59 +274,59 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col p-4 md:p-8 max-w-7xl mx-auto w-full">
       {/* 1. CABEÇALHO DA APLICAÇÃO */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-[var(--card-border)]">
-        <div>
-          
-          {/* <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-[var(--foreground)]/70 bg-[var(--card-bg)] border border-[var(--card-border)] px-2.5 py-1 rounded-md">
-              <Database className="w-3.5 h-3.5 text-[var(--primary)]" />
-              
-              <span>Fonte: </span>
-              <span className={`font-bold capitalize ${
-                apiSource.includes("mock") ? "text-amber-500" : "text-emerald-500"
-              }`}>
-                {apiSource === "mock" ? "Ambiente Mock (Local)" : apiSource === "api" ? "ClickUp Live (Real)" : "ClickUp Cache (5m)"}
-              </span>
-            </div>
-          </div> */}
-          <img src="dizevolv.svg" className="h-15 w-auto mt-2 mb-8" alt="" />
+      <header className="flex flex-col gap-6 mb-8 pb-6 border-b border-[var(--card-border)]">
+        {/* Linha Superior: Logo e Botões */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <img src="dizevolv.svg" className="h-12 md:h-15 w-auto mt-2" alt="Dizevolv Logo" />
 
+          <div className="flex items-center gap-3 self-start sm:self-auto shrink-0">
+            <button 
+              onClick={toggleTheme}
+              className="flex items-center justify-center p-2.5 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--foreground)] hover:bg-[var(--card-hover)] transition cursor-pointer shadow-md animate-none"
+              title={theme === "light" ? "Mudar para modo escuro" : "Mudar para modo claro"}
+            >
+              {theme === "light" ? (
+                <Moon className="w-5 h-5 text-[var(--primary)]" />
+              ) : (
+                <Sun className="w-5 h-5 text-amber-500" />
+              )}
+            </button>
+
+            <button 
+              onClick={() => setRefreshTrigger(prev => prev + 1)}
+              disabled={loading}
+              className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-slate-300 disabled:text-slate-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition duration-150 cursor-pointer shadow-md disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              Recarregar Painel
+            </button>
+          </div>
+        </div>
+
+        {/* Linha Inferior: Breadcrumbs e Título do Painel */}
+        <div>
           {/* Espaço / Pasta Hierarchy Breadcrumbs */}
-          <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-[var(--primary)] uppercase tracking-wider mt-4">
+          <img 
+            src="clickup.svg" 
+            className={`h-12 md:h-4 w-auto mt-2 dark:brightness-0 dark:invert transition-all duration-500 ${
+              apiSource.startsWith("mock") ? "blur-[3px] opacity-60" : "blur-0 opacity-100"
+            }`} 
+            alt="ClickUp Logo" 
+            title={apiSource.startsWith("mock") ? "Modo Simulação (ClickUp desconectado)" : "ClickUp Conectado (Live)"}
+          />
+          
+          <div className="flex items-center gap-1 text-[10px] font-extrabold text-[var(--primary)] uppercase tracking-wider mt-2">
             <span>{listDetails ? listDetails.space : "Dizevolv Tech"}</span>
             <span className="text-[var(--foreground)]/30 font-extrabold">/</span>
             <span>{listDetails ? listDetails.folder : "Assessoria"}</span>
           </div>
 
-          <h1 className="text-3xl font-extrabold text-[var(--foreground)] mt-1 tracking-tight">
+          <h1 className="text-3xl font-extrabold text-[var(--foreground)] mt-0 tracking-tight">
             {listDetails ? listDetails.name : "Project Pulse"}
           </h1>
           <p className="text-sm text-[var(--foreground)]/70 mt-1 max-w-xl">
             Visão consolidada de gargalos operacionais e saúde produtiva tratados em tempo real.
           </p>
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto self-end md:self-auto shrink-0">
-          <button 
-            onClick={toggleTheme}
-            className="flex items-center justify-center p-2.5 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--foreground)] hover:bg-[var(--card-hover)] transition cursor-pointer shadow-md animate-none"
-            title={theme === "light" ? "Mudar para modo escuro" : "Mudar para modo claro"}
-          >
-            {theme === "light" ? (
-              <Moon className="w-5 h-5 text-[var(--primary)]" />
-            ) : (
-              <Sun className="w-5 h-5 text-amber-500" />
-            )}
-          </button>
-
-          <button 
-            onClick={() => setRefreshTrigger(prev => prev + 1)}
-            disabled={loading}
-            className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-slate-300 disabled:text-slate-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition duration-150 cursor-pointer shadow-md disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Recarregar Painel
-          </button>
         </div>
       </header>
 
@@ -605,17 +605,30 @@ function TaskCard({
           <p className="text-[var(--foreground)]/40 text-xs italic mb-4">Sem descrição detalhada.</p>
         )}
 
-        {/* Prazo de Vencimento Badge */}
-        {task.due_date && (() => {
-          const badge = formatDueDate(task.due_date, column);
-          if (!badge) return null;
-          return (
-            <div className={`flex items-center gap-1.5 text-[10px] font-bold border px-2.5 py-1 rounded-lg w-fit mb-4 ${badge.colorClass}`}>
-              <Calendar className="w-3.5 h-3.5 shrink-0" />
-              <span>{badge.text}</span>
-            </div>
-          );
-        })()}
+        {/* Badges de Metadados (Prazo e Prioridade) */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {task.due_date && (() => {
+            const badge = formatDueDate(task.due_date, column);
+            if (!badge) return null;
+            return (
+              <div className={`flex items-center gap-1.5 text-[10px] font-bold border px-2.5 py-1 rounded-lg w-fit ${badge.colorClass}`}>
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                <span>{badge.text}</span>
+              </div>
+            );
+          })()}
+
+          {task.priority && (() => {
+            const badge = formatPriority(task.priority);
+            if (!badge) return null;
+            return (
+              <div className={`flex items-center gap-1.5 text-[10px] font-bold border px-2.5 py-1 rounded-lg w-fit ${badge.colorClass}`}>
+                <Layers className="w-3.5 h-3.5 shrink-0" />
+                <span>{badge.text}</span>
+              </div>
+            );
+          })()}
+        </div>
 
         {/* Rodapé do Card */}
         <div className="flex items-center justify-between pt-3.5 border-t border-[var(--card-border)] gap-3 mt-auto">
@@ -729,4 +742,40 @@ function formatDueDate(timestampStr: string | null, statusColumn: "todo" | "doin
     return { text: `Vence Amanhã (${dateFormatted})`, colorClass: "text-[var(--primary)] bg-[var(--primary-glow)] border-[var(--primary)]/20" };
   }
   return { text: `Vence em ${diffDays} dias (${dateFormatted})`, colorClass: "text-[var(--foreground)]/60 bg-[var(--column-bg)] border-[var(--card-border)]" };
+}
+
+/* FUNÇÃO AUXILIAR: FORMATAÇÃO DE PRIORIDADES EM PORTUGUÊS COM CORES DO DESIGN SYSTEM */
+function formatPriority(priorityObj: Priority | null) {
+  if (!priorityObj) return null;
+  const p = (priorityObj.priority || "").toLowerCase();
+  
+  if (p === "urgent" || p === "urgente") {
+    return {
+      text: "Prioridade: Urgente",
+      colorClass: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-500/25 font-bold"
+    };
+  }
+  if (p === "high" || p === "alta") {
+    return {
+      text: "Prioridade: Alta",
+      colorClass: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-500/30 font-bold"
+    };
+  }
+  if (p === "normal") {
+    return {
+      text: "Prioridade: Normal",
+      colorClass: "text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-500/30 font-bold"
+    };
+  }
+  if (p === "low" || p === "baixa") {
+    return {
+      text: "Prioridade: Baixa",
+      colorClass: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 font-bold"
+    };
+  }
+  
+  return {
+    text: `Prioridade: ${priorityObj.priority}`,
+    colorClass: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 font-bold"
+  };
 }
