@@ -113,12 +113,26 @@ app.get('/', (req, res) => {
  */
 app.get('/api/tasks', async (req, res) => {
   try {
+    // Mock List Details padrão para uso offline / fallbacks
+    const mockListDetails = {
+      name: "Sprint Atual - Project Pulse",
+      folder: "Assessoria Tecnológica",
+      space: "Dizevolv Tech",
+      statuses: [
+        { status: "pendente", color: "#64748b" },
+        { status: "em progresso", color: "#f59e0b" },
+        { status: "feito", color: "#10b981" },
+        { status: "concluido", color: "#10b981" }
+      ]
+    };
+
     // Se o ClickUp NÃO estiver configurado, usa o mockData (facilmente deletável)
     if (!isClickUpConfigured) {
       const { getMockTasks } = require('./mockData');
       const processedTasks = processTaskCriticism(getMockTasks());
       return res.json({
         source: 'mock',
+        listDetails: mockListDetails,
         tasks: processedTasks
       });
     }
@@ -132,7 +146,8 @@ app.get('/api/tasks', async (req, res) => {
       console.log('📦 [Pulse BFF Cache] Retornando dados em cache da API do ClickUp.');
       return res.json({
         source: 'cache',
-        tasks: cachedData
+        listDetails: cachedData.listDetails,
+        tasks: cachedData.tasks
       });
     }
 
@@ -140,40 +155,71 @@ app.get('/api/tasks', async (req, res) => {
       console.log('🔄 [Pulse BFF API] Ignorando cache por solicitação do cliente (bypassCache=true).');
     }
 
-    // Se não estiver em cache, faz a requisição HTTP segura para a API Oficial
-    console.log('🌐 [Pulse BFF API] Consultando API oficial do ClickUp (incluindo fechadas)...');
-    const clickupUrl = `https://api.clickup.com/api/v2/list/${cleanListId}/task?include_closed=true`;
+    // Faz a consulta paralela ao List Details e às Tasks do ClickUp
+    console.log('🌐 [Pulse BFF API] Consultando API oficial do ClickUp em paralelo (List Details + Tasks)...');
     
-    const response = await axios.get(clickupUrl, {
-      headers: {
-        'Authorization': cleanToken
-      }
-    });
+    const [listResponse, tasksResponse] = await Promise.all([
+      axios.get(`https://api.clickup.com/api/v2/list/${cleanListId}`, {
+        headers: { 'Authorization': cleanToken }
+      }),
+      axios.get(`https://api.clickup.com/api/v2/list/${cleanListId}/task?include_closed=true`, {
+        headers: { 'Authorization': cleanToken }
+      })
+    ]);
 
-    // Filtra e processa as tarefas
-    const rawTasks = response.data.tasks || [];
+    const listData = listResponse.data;
+    const listDetails = {
+      name: listData.name,
+      folder: listData.folder ? listData.folder.name : 'Lista Avulsa',
+      space: listData.space ? listData.space.name : (listData.folder && listData.folder.space ? listData.folder.space.name : 'Espaço Padrão'),
+      statuses: listData.statuses ? listData.statuses.map(s => ({
+        status: s.status,
+        color: s.color
+      })) : []
+    };
+
+    const rawTasks = tasksResponse.data.tasks || [];
     const processedTasks = processTaskCriticism(rawTasks);
 
+    const payloadToCache = {
+      listDetails,
+      tasks: processedTasks
+    };
+
     // Salva no cache com TTL padrão (5 minutos)
-    cache.set(cacheKey, processedTasks);
+    cache.set(cacheKey, payloadToCache);
 
     return res.json({
       source: 'api',
+      listDetails,
       tasks: processedTasks
     });
 
   } catch (error) {
-    console.error('❌ [Pulse BFF Error] Erro ao buscar tarefas:', error.message);
+    console.error('❌ [Pulse BFF Error] Erro ao buscar dados:', error.message);
     
-    // Tratamento de erro resiliente: se a API do ClickUp falhar e tivermos chaves inválidas,
-    // retorna os dados Mock com aviso para não quebrar a visualização executiva do líder
+    // Tratamento de erro resiliente
     try {
       console.log('🔄 [Pulse BFF Resiliência] Acionando Modo Mock de segurança para manter a UI funcionando.');
       const { getMockTasks } = require('./mockData');
       const processedTasks = processTaskCriticism(getMockTasks());
+      
+      const mockListDetails = {
+        name: "Sprint Atual - Project Pulse",
+        folder: "Assessoria Tecnológica",
+        space: "Dizevolv Tech",
+        statuses: [
+          { status: "pendente", color: "#64748b" },
+          { status: "em progresso", color: "#f59e0b" },
+          { status: "feito", color: "#10b981" },
+          { status: "concluido", color: "#10b981" }
+        ]
+      };
+
       return res.status(200).json({
         source: 'mock_fallback_on_error',
         error: error.message,
+        listDetails: mockListDetails,
         tasks: processedTasks
       });
     } catch (mockError) {

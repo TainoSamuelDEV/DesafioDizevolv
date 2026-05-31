@@ -13,7 +13,9 @@ import {
   Clock, 
   Info,
   HelpCircle,
-  Database
+  Database,
+  Sun,
+  Moon
 } from "lucide-react";
 
 interface Assignee {
@@ -49,14 +51,44 @@ interface Task {
   };
 }
 
+interface StatusColor {
+  status: string;
+  color: string;
+}
+
+interface ListDetails {
+  name: string;
+  folder: string;
+  space: string;
+  statuses: StatusColor[];
+}
+
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [listDetails, setListDetails] = useState<ListDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [apiSource, setApiSource] = useState<string>("mock");
   const [filterText, setFilterText] = useState("");
   const [filterAssignee, setFilterAssignee] = useState("all");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  // Sincroniza a classe .dark no elemento raiz <html> para alternância de temas CSS
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const root = window.document.documentElement;
+      if (theme === "dark") {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === "light" ? "dark" : "light");
+  };
 
   // URL do BFF (Backend For Frontend) resolvida dinamicamente para evitar bloqueios de rede privada (PNA)
   const [bffUrl, setBffUrl] = useState("http://localhost:3001");
@@ -89,6 +121,7 @@ export default function Dashboard() {
         }
         const data = await res.json();
         setTasks(data.tasks || []);
+        setListDetails(data.listDetails || null);
         setApiSource(data.source || "mock");
       } catch (err: any) {
         console.error("Erro ao conectar no BFF:", err);
@@ -142,6 +175,25 @@ export default function Dashboard() {
       return "done";
     }
     return "todo"; // Fallback seguro
+  };
+
+  // Retorna a cor exata do status configurado no ClickUp
+  const getStatusColor = (columnType: "todo" | "doing" | "done", defaultColor: string) => {
+    if (!listDetails || !listDetails.statuses) return defaultColor;
+    const match = listDetails.statuses.find(s => {
+      const norm = s.status.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+      if (columnType === "todo") {
+        return norm.includes("todo") || norm.includes("backlog") || norm.includes("agendado") || norm.includes("planejado") || norm.includes("afazer") || norm.includes("pendente");
+      }
+      if (columnType === "doing") {
+        return norm.includes("doing") || norm.includes("progress") || norm.includes("emprogresso") || norm.includes("desenvolvimento") || norm.includes("execucao");
+      }
+      if (columnType === "done") {
+        return norm.includes("done") || norm.includes("complete") || norm.includes("concluido") || norm.includes("finalizado") || norm.includes("entregue") || norm.includes("feito");
+      }
+      return false;
+    });
+    return match ? match.color : defaultColor;
   };
 
   // Extrai lista única de todos os responsáveis/assignees presentes nas tarefas carregadas para o filtro
@@ -217,56 +269,80 @@ export default function Dashboard() {
     return `Atualizado há ${diffDays} dias`;
   };
 
+  const doneColor = getStatusColor("done", "#10b981");
+
   return (
     <div className="flex-1 flex flex-col p-4 md:p-8 max-w-7xl mx-auto w-full">
       {/* 1. CABEÇALHO DA APLICAÇÃO */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-slate-800">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-[var(--card-border)]">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-md tracking-wider">
-              BFF PATTERN
-            </span>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-md">
-              <Database className="w-3.5 h-3.5 text-indigo-400" />
+          
+          {/* <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-[var(--foreground)]/70 bg-[var(--card-bg)] border border-[var(--card-border)] px-2.5 py-1 rounded-md">
+              <Database className="w-3.5 h-3.5 text-[var(--primary)]" />
+              
               <span>Fonte: </span>
-              <span className={`font-semibold capitalize ${
-                apiSource.includes("mock") ? "text-amber-400" : "text-emerald-400"
+              <span className={`font-bold capitalize ${
+                apiSource.includes("mock") ? "text-amber-500" : "text-emerald-500"
               }`}>
                 {apiSource === "mock" ? "Ambiente Mock (Local)" : apiSource === "api" ? "ClickUp Live (Real)" : "ClickUp Cache (5m)"}
               </span>
             </div>
+          </div> */}
+          <img src="dizevolv.svg" className="h-15 w-auto mt-2 mb-8" alt="" />
+
+          {/* Espaço / Pasta Hierarchy Breadcrumbs */}
+          <div className="flex items-center gap-1.5 text-[10px] font-extrabold text-[var(--primary)] uppercase tracking-wider mt-4">
+            <span>{listDetails ? listDetails.space : "Dizevolv Tech"}</span>
+            <span className="text-[var(--foreground)]/30 font-extrabold">/</span>
+            <span>{listDetails ? listDetails.folder : "Assessoria"}</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white mt-2 tracking-tight">
-            Project <span className="text-indigo-400">Pulse</span>
+
+          <h1 className="text-3xl font-extrabold text-[var(--foreground)] mt-1 tracking-tight">
+            {listDetails ? listDetails.name : "Project Pulse"}
           </h1>
-          <p className="text-sm text-slate-400 mt-1 max-w-xl">
-            Visão estratégica consolidada de gargalos operacionais da Dizevolv Tech. Dados tratados em tempo real no servidor BFF.
+          <p className="text-sm text-[var(--foreground)]/70 mt-1 max-w-xl">
+            Visão consolidada de gargalos operacionais e saúde produtiva tratados em tempo real.
           </p>
         </div>
 
-        <button 
-          onClick={() => setRefreshTrigger(prev => prev + 1)}
-          disabled={loading}
-          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:text-slate-500 font-medium text-sm px-4 py-2.5 rounded-lg border border-slate-700 transition duration-150 cursor-pointer shadow-md disabled:cursor-not-allowed"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Recarregar Painel
-        </button>
+        <div className="flex items-center gap-3 w-full md:w-auto self-end md:self-auto shrink-0">
+          <button 
+            onClick={toggleTheme}
+            className="flex items-center justify-center p-2.5 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--foreground)] hover:bg-[var(--card-hover)] transition cursor-pointer shadow-md animate-none"
+            title={theme === "light" ? "Mudar para modo escuro" : "Mudar para modo claro"}
+          >
+            {theme === "light" ? (
+              <Moon className="w-5 h-5 text-[var(--primary)]" />
+            ) : (
+              <Sun className="w-5 h-5 text-amber-500" />
+            )}
+          </button>
+
+          <button 
+            onClick={() => setRefreshTrigger(prev => prev + 1)}
+            disabled={loading}
+            className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-slate-300 disabled:text-slate-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition duration-150 cursor-pointer shadow-md disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            Recarregar Painel
+          </button>
+        </div>
       </header>
 
       {/* ERROR CARD */}
       {error && (
-        <div className="bg-red-950/40 border border-red-500/50 rounded-xl p-5 mb-8 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/50 rounded-xl p-5 mb-8 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex gap-3">
-            <AlertTriangle className="w-6 h-6 text-red-400 shrink-0 mt-0.5 md:mt-0" />
+            <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 shrink-0 mt-0.5 md:mt-0" />
             <div>
-              <h3 className="font-bold text-red-200">Falha na Comunicação</h3>
-              <p className="text-sm text-red-300/90 mt-0.5">{error}</p>
+              <h3 className="font-bold text-red-800 dark:text-red-200">Falha na Comunicação</h3>
+              <p className="text-sm text-red-700 dark:text-red-300/90 mt-0.5">{error}</p>
             </div>
           </div>
           <button 
             onClick={() => setRefreshTrigger(prev => prev + 1)}
-            className="bg-red-900 hover:bg-red-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"
+            className="bg-red-600 hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"
           >
             Tentar Conectar
           </button>
@@ -274,110 +350,107 @@ export default function Dashboard() {
       )}
 
       {/* 2. BLOCO ANALÍTICO DO TOPO (Métricas Executivas) */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8" aria-label="Métricas Executivas">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" aria-label="Métricas Executivas">
         {/* Card 1: Total */}
-        <div className="glass-panel rounded-xl p-6 relative overflow-hidden group shadow-lg">
-          <div className="absolute top-0 right-0 p-4 opacity-15">
-            <Layers className="w-16 h-16 text-indigo-400" />
+        <div className="bg-[var(--card-bg)] p-6 rounded-2xl border border-[var(--card-border)] custom-shadow flex flex-col transition-all duration-200">
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-2 bg-[var(--primary-glow)] rounded-lg">
+              <Layers className="w-5 h-5 text-[var(--primary)]" />
+            </div>
+            <span className="text-slate-500 dark:text-slate-400 font-extrabold text-[10px] tracking-widest uppercase">Métricas Ativas</span>
           </div>
-          <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">
-            Total de Demandas
-          </p>
-          <div className="flex items-baseline gap-2 mt-3">
+          <div className="flex items-baseline gap-2">
             {loading ? (
-              <div className="h-9 w-16 bg-slate-800 animate-pulse rounded"></div>
+              <div className="h-9 w-16 bg-[var(--card-border)] animate-pulse rounded"></div>
             ) : (
-              <span className="text-4xl font-extrabold text-white">{metrics.total}</span>
+              <span className="text-4xl font-black text-[var(--foreground)]">{metrics.total}</span>
             )}
-            <span className="text-xs text-slate-500">filtradas</span>
+            <span className="text-slate-600 dark:text-slate-300 font-medium text-sm">Demandas</span>
           </div>
-          <p className="text-xs text-slate-400 mt-2.5 flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-indigo-400" />
-            Tarefas totais ativas na coluna Kanban.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2.5 flex items-center gap-1.5 font-medium">
+            <Info className="w-3.5 h-3.5 text-[var(--primary)]" />
+            Tarefas totais ativas no quadro atual.
           </p>
         </div>
 
         {/* Card 2: Críticas (Destaque Vermelho Pulsante) */}
-        <div className="glass-panel rounded-xl p-6 relative overflow-hidden group border-red-500/20 shadow-lg bg-red-950/5">
-          {metrics.critical > 0 && !loading && (
-            <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none"></div>
-          )}
-          <div className="absolute top-0 right-0 p-4 opacity-15">
-            <AlertTriangle className="w-16 h-16 text-red-500" />
+        <div className="bg-[var(--card-bg)] p-6 rounded-2xl border-l-4 border-l-red-500 border border-[var(--card-border)] custom-shadow flex flex-col transition-all duration-200">
+          <div className="flex justify-between items-start mb-4">
+            <div className="p-2 bg-red-500/5 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+              <span className="text-red-500 font-extrabold text-[10px] tracking-widest uppercase">Crítico</span>
+            </div>
           </div>
-          <p className="text-xs font-bold text-red-400 tracking-wider uppercase flex items-center gap-1.5">
-            Gargalos Críticos
-            {metrics.critical > 0 && (
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-            )}
-          </p>
-          <div className="flex items-baseline gap-2 mt-3">
+          <div className="flex items-baseline gap-2">
             {loading ? (
-              <div className="h-9 w-16 bg-slate-800 animate-pulse rounded"></div>
+              <div className="h-9 w-16 bg-[var(--card-border)] animate-pulse rounded"></div>
             ) : (
-              <span className="text-4xl font-extrabold text-red-500">{metrics.critical}</span>
+              <span className="text-4xl font-black text-red-500">{metrics.critical}</span>
             )}
-            <span className="text-xs text-red-400/70">atenção imediata</span>
+            <span className="text-red-500 font-medium text-sm">Gargalo{metrics.critical === 1 ? "" : "s"}</span>
           </div>
-          <p className="text-xs text-red-300/80 mt-2.5 flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-            Urgentes ou estagnadas há mais de 3 dias.
+          <p className="text-xs text-red-800 dark:text-red-200 mt-2.5 flex items-center gap-1.5 font-medium">
+            <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+            Atenção imediata requerida. Urgentes ou estagnadas.
           </p>
         </div>
 
         {/* Card 3: Concluídas (Calm Green) */}
-        <div className="glass-panel rounded-xl p-6 relative overflow-hidden group border-emerald-500/20 shadow-lg bg-emerald-950/5">
-          <div className="absolute top-0 right-0 p-4 opacity-15">
-            <CheckCircle className="w-16 h-16 text-emerald-500" />
+        <div className="bg-[var(--card-bg)] p-6 rounded-2xl border border-[var(--card-border)] custom-shadow flex flex-col transition-all duration-200">
+          <div className="flex justify-between items-start mb-4">
+            <div style={{ backgroundColor: `${doneColor}15` }} className="p-2 rounded-lg">
+              <CheckCircle style={{ color: doneColor }} className="w-5 h-5" />
+            </div>
+            <span style={{ color: doneColor }} className="font-extrabold text-[10px] tracking-widest uppercase">Progresso</span>
           </div>
-          <p className="text-xs font-bold text-emerald-400 tracking-wider uppercase">
-            Demandas Concluídas
-          </p>
-          <div className="flex items-baseline gap-2 mt-3">
+          <div className="flex items-baseline gap-2">
             {loading ? (
-              <div className="h-9 w-16 bg-slate-800 animate-pulse rounded"></div>
+              <div className="h-9 w-16 bg-[var(--card-border)] animate-pulse rounded"></div>
             ) : (
-              <span className="text-4xl font-extrabold text-emerald-500">{metrics.completed}</span>
+              <span style={{ color: doneColor }} className="text-4xl font-black">{metrics.completed}</span>
             )}
-            <span className="text-xs text-emerald-500/70">finalizadas</span>
+            <span style={{ color: doneColor }} className="font-medium text-sm">Entregue{metrics.completed === 1 ? "" : "s"}</span>
           </div>
-          <p className="text-xs text-emerald-300/80 mt-2.5 flex items-center gap-1.5">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-            Taxa de entrega: {loading ? "0" : metrics.total > 0 ? Math.round((metrics.completed / metrics.total) * 100) : 0}% concluído.
+          <div className="w-full bg-[var(--column-bg)] h-1.5 rounded-full mt-3.5 overflow-hidden">
+            <div style={{ width: `${loading ? 0 : metrics.total > 0 ? Math.round((metrics.completed / metrics.total) * 100) : 0}%`, backgroundColor: doneColor }} className="h-full rounded-full transition-all duration-300"></div>
+          </div>
+          <p className="text-xs text-slate-700 dark:text-slate-300 mt-2.5 flex items-center gap-1.5 font-medium">
+            <CheckCircle style={{ color: doneColor }} className="w-3.5 h-3.5 shrink-0" />
+            Taxa de entrega: <span style={{ color: doneColor }} className="font-bold">{loading ? "0" : metrics.total > 0 ? Math.round((metrics.completed / metrics.total) * 100) : 0}%</span> concluído.
           </p>
         </div>
       </section>
 
       {/* 3. FILTROS RÁPIDOS */}
-      <section className="glass-panel rounded-xl p-5 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-md" aria-label="Filtros e Controles">
+      <section className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-5 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm" aria-label="Filtros e Controles">
         <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-[var(--foreground)]/40" />
           <input
             type="text"
             placeholder="Buscar por título ou descrição..."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-400 text-sm pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition duration-150"
+            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--foreground)] placeholder-[var(--foreground)]/40 text-sm pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition duration-150 shadow-sm"
           />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-            <User className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Responsável:</span>
+            <User className="w-4 h-4 text-[var(--primary)]" />
+            <span className="text-xs font-bold text-[var(--foreground)]/70 uppercase tracking-wide">Responsável:</span>
           </div>
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
-            className="w-full sm:w-48 bg-slate-900 border border-slate-700 text-slate-200 text-sm px-3.5 py-2.5 rounded-lg focus:outline-none focus:border-indigo-500 transition duration-150 cursor-pointer"
+            className="w-full sm:w-48 bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--foreground)] text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-[var(--primary)] transition duration-150 cursor-pointer shadow-sm"
           >
-            <option value="all">Todos os Membros</option>
-            <option value="unassigned">Sem Responsável</option>
+            <option value="all" className="bg-[var(--card-bg)] text-[var(--foreground)]">Todos os Membros</option>
+            <option value="unassigned" className="bg-[var(--card-bg)] text-[var(--foreground)]">Sem Responsável</option>
             {allAssignees.map(member => (
-              <option key={member.id} value={member.id}>
+              <option key={member.id} value={member.id} className="bg-[var(--card-bg)] text-[var(--foreground)]">
                 {member.username}
               </option>
             ))}
@@ -389,7 +462,7 @@ export default function Dashboard() {
                 setFilterText("");
                 setFilterAssignee("all");
               }}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer underline shrink-0"
+              className="text-xs text-[var(--primary)] hover:underline font-semibold cursor-pointer shrink-0"
             >
               Limpar Filtros
             </button>
@@ -400,15 +473,15 @@ export default function Dashboard() {
       {/* 4. KANBAN BOARD */}
       <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 items-start">
         {/* COLUNA: TO DO */}
-        <section className="flex flex-col bg-slate-950/40 rounded-xl border border-slate-800 p-4 h-full min-h-[500px]" aria-label="Coluna To Do">
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800/80">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-slate-400"></div>
-              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">A Fazer</h2>
+        <section className="flex flex-col bg-[var(--column-bg)] backdrop-blur-md border border-[var(--column-border)] p-4 rounded-2xl shadow-sm gap-4" aria-label="Coluna To Do">
+          <div className="flex justify-between items-center px-2 py-1">
+            <div className="flex items-center gap-3">
+              <div style={{ backgroundColor: getStatusColor("todo", "#f97316") }} className="w-1.5 h-6 rounded-full"></div>
+              <h2 className="font-bold text-lg text-[var(--foreground)]">A Fazer</h2>
+              <span className="bg-slate-200 dark:bg-slate-800 text-[var(--foreground)]/70 text-[11px] font-extrabold px-2.5 py-0.5 rounded-md border border-[var(--card-border)] shadow-sm">
+                {loading ? "..." : kanbanColumns.todo.length}
+              </span>
             </div>
-            <span className="bg-slate-900 text-slate-400 text-xs font-bold px-2 py-0.5 rounded-md border border-slate-800">
-              {loading ? "..." : kanbanColumns.todo.length}
-            </span>
           </div>
 
           <div className="flex flex-col gap-4 flex-1">
@@ -423,15 +496,15 @@ export default function Dashboard() {
         </section>
 
         {/* COLUNA: DOING */}
-        <section className="flex flex-col bg-slate-950/40 rounded-xl border border-slate-800 p-4 h-full min-h-[500px]" aria-label="Coluna Doing">
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800/80">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
-              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Em Execução</h2>
+        <section className="flex flex-col bg-[var(--column-bg)] backdrop-blur-md border border-[var(--column-border)] p-4 rounded-2xl shadow-sm gap-4" aria-label="Coluna Doing">
+          <div className="flex justify-between items-center px-2 py-1">
+            <div className="flex items-center gap-3">
+              <div style={{ backgroundColor: getStatusColor("doing", "#facc15") }} className="w-1.5 h-6 rounded-full"></div>
+              <h2 className="font-bold text-lg text-[var(--foreground)]">Em Execução</h2>
+              <span className="bg-slate-200 dark:bg-slate-800 text-[var(--foreground)]/70 text-[11px] font-extrabold px-2.5 py-0.5 rounded-md border border-[var(--card-border)] shadow-sm">
+                {loading ? "..." : kanbanColumns.doing.length}
+              </span>
             </div>
-            <span className="bg-slate-900 text-slate-400 text-xs font-bold px-2 py-0.5 rounded-md border border-slate-800">
-              {loading ? "..." : kanbanColumns.doing.length}
-            </span>
           </div>
 
           <div className="flex flex-col gap-4 flex-1">
@@ -446,15 +519,15 @@ export default function Dashboard() {
         </section>
 
         {/* COLUNA: DONE */}
-        <section className="flex flex-col bg-slate-950/40 rounded-xl border border-slate-800 p-4 h-full min-h-[500px]" aria-label="Coluna Done">
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800/80">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Concluído</h2>
+        <section className="flex flex-col bg-[var(--column-bg)] backdrop-blur-md border border-[var(--column-border)] p-4 rounded-2xl shadow-sm gap-4" aria-label="Coluna Done">
+          <div className="flex justify-between items-center px-2 py-1">
+            <div className="flex items-center gap-3">
+              <div style={{ backgroundColor: getStatusColor("done", "#10b981") }} className="w-1.5 h-6 rounded-full"></div>
+              <h2 className="font-bold text-lg text-[var(--foreground)]">Concluído</h2>
+              <span className="bg-slate-200 dark:bg-slate-800 text-[var(--foreground)]/70 text-[11px] font-extrabold px-2.5 py-0.5 rounded-md border border-[var(--card-border)] shadow-sm">
+                {loading ? "..." : kanbanColumns.done.length}
+              </span>
             </div>
-            <span className="bg-slate-900 text-slate-400 text-xs font-bold px-2 py-0.5 rounded-md border border-slate-800">
-              {loading ? "..." : kanbanColumns.done.length}
-            </span>
           </div>
 
           <div className="flex flex-col gap-4 flex-1">
@@ -482,83 +555,98 @@ function TaskCard({
   formatTimeAgo: (t: string) => string;
   column: "todo" | "doing" | "done";
 }) {
-  const isUrgentPriority = task.priority?.priority?.toLowerCase() === "urgent";
+  const isDone = column === "done";
+  const isCritical = task.status_critico && !isDone;
 
   return (
     <article 
-      className={`bg-[#111420] border rounded-xl p-5 relative transition duration-200 hover:scale-[1.01] hover:border-slate-600 shadow-md ${
-        task.status_critico 
-          ? "border-red-500/40 critical-card-glow hover:border-red-500" 
-          : "border-slate-800 hover:bg-[#151928]"
+      className={`relative rounded-xl transition-all duration-200 hover:scale-[1.01] custom-shadow hover:shadow-md cursor-grab group overflow-hidden ${
+        isDone ? "opacity-70 grayscale-[0.3]" : ""
+      } ${
+        isCritical 
+          ? "p-[1.5px] bg-[var(--card-border)] critical-card-glow" 
+          : "border border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--foreground)]/30 hover:bg-[var(--card-hover)] p-5"
       }`}
     >
-      {/* Badge Superior de Criticidade */}
-      {task.status_critico && (
-        <div className="flex items-center gap-1 text-[10px] font-extrabold bg-red-950/60 text-red-400 border border-red-500/30 px-2 py-1 rounded-md mb-3.5 uppercase tracking-wider w-fit">
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <span>
-            {task.criticidade_detalhes?.isUrgent 
-              ? "Urgente" 
-              : `Estagnado (${task.criticidade_detalhes?.diasSemAtualizar} dias)`}
-          </span>
-        </div>
+      {/* Elemento de Borda Rotativa Conic */}
+      {isCritical && (
+        <div 
+          className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_30%,#ef4444_50%,transparent_70%)] animate-[spin_2s_linear_infinite]"
+        ></div>
       )}
 
-      {/* Título da Demanda */}
-      <h3 className="font-semibold text-slate-100 text-sm leading-snug tracking-tight mb-2">
-        {task.name}
-      </h3>
-
-      {/* Descrição Curta */}
-      {task.description ? (
-        <p className="text-slate-400 text-xs line-clamp-2 leading-relaxed mb-4">
-          {task.description}
-        </p>
-      ) : (
-        <p className="text-slate-500 text-xs italic mb-4">Sem descrição detalhada.</p>
-      )}
-
-      {/* Prazo de Vencimento Badge */}
-      {task.due_date && (() => {
-        const badge = formatDueDate(task.due_date, column);
-        if (!badge) return null;
-        return (
-          <div className={`flex items-center gap-1.5 text-[10px] font-bold border px-2.5 py-1 rounded-lg w-fit mb-4 ${badge.colorClass}`}>
-            <Calendar className="w-3.5 h-3.5 shrink-0" />
-            <span>{badge.text}</span>
+      {/* Conteúdo Interno do Card */}
+      <div 
+        className={isCritical ? "relative bg-[var(--card-bg)] rounded-[11px] p-5 w-full h-full flex flex-col bg-gradient-to-br from-[var(--card-bg)] to-red-500/[0.03]" : "flex flex-col w-full h-full"}
+      >
+        {/* Badge Superior de Criticidade */}
+        {task.status_critico && !isDone && (
+          <div className="flex items-center gap-1 text-[10px] font-extrabold bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 px-2.5 py-1 rounded mb-3 uppercase tracking-wider w-fit">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span>
+              {task.criticidade_detalhes?.isUrgent 
+                ? "Urgente" 
+                : `Estagnado (${task.criticidade_detalhes?.diasSemAtualizar} dias)`}
+            </span>
           </div>
-        );
-      })()}
+        )}
 
-      {/* Rodapé do Card */}
-      <div className="flex items-center justify-between pt-3.5 border-t border-slate-800/80 gap-3">
-        {/* Indicadores de Tempo */}
-        <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
-          <Clock className="w-3 h-3 text-slate-500" />
-          <span>{formatTimeAgo(task.date_updated)}</span>
-        </div>
+        {/* Título da Demanda */}
+        <h3 className="font-bold text-[var(--foreground)] text-base mb-2 leading-snug tracking-tight">
+          {task.name}
+        </h3>
 
-        {/* Avatares dos Responsáveis */}
-        <div className="flex items-center -space-x-1.5 overflow-hidden">
-          {task.assignees && task.assignees.length > 0 ? (
-            task.assignees.map(assignee => (
-              <div 
-                key={assignee.id}
-                title={`Responsável: ${assignee.username}`}
-                style={{ backgroundColor: assignee.color || "#4f46e5" }}
-                className="w-5.5 h-5.5 rounded-full border border-[#111420] flex items-center justify-center text-[9px] font-extrabold text-white uppercase shrink-0"
-              >
-                {assignee.initials}
-              </div>
-            ))
-          ) : (
-            <div 
-              title="Sem responsável designado"
-              className="w-5.5 h-5.5 rounded-full border border-[#111420] bg-slate-800 flex items-center justify-center text-[9px] text-slate-500 shrink-0"
-            >
-              <User className="w-3 h-3" />
+        {/* Descrição Curta */}
+        {task.description ? (
+          <p className="text-[var(--foreground)]/70 text-xs line-clamp-2 leading-relaxed mb-4">
+            {task.description}
+          </p>
+        ) : (
+          <p className="text-[var(--foreground)]/40 text-xs italic mb-4">Sem descrição detalhada.</p>
+        )}
+
+        {/* Prazo de Vencimento Badge */}
+        {task.due_date && (() => {
+          const badge = formatDueDate(task.due_date, column);
+          if (!badge) return null;
+          return (
+            <div className={`flex items-center gap-1.5 text-[10px] font-bold border px-2.5 py-1 rounded-lg w-fit mb-4 ${badge.colorClass}`}>
+              <Calendar className="w-3.5 h-3.5 shrink-0" />
+              <span>{badge.text}</span>
             </div>
-          )}
+          );
+        })()}
+
+        {/* Rodapé do Card */}
+        <div className="flex items-center justify-between pt-3.5 border-t border-[var(--card-border)] gap-3 mt-auto">
+          {/* Indicadores de Tempo */}
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--foreground)]/50">
+            <Clock className="w-3 h-3 text-[var(--foreground)]/50" />
+            <span>{formatTimeAgo(task.date_updated)}</span>
+          </div>
+
+          {/* Avatares dos Responsáveis */}
+          <div className="flex items-center -space-x-1.5 overflow-hidden">
+            {task.assignees && task.assignees.length > 0 ? (
+              task.assignees.map(assignee => (
+                <div 
+                  key={assignee.id}
+                  title={`Responsável: ${assignee.username}`}
+                  style={{ backgroundColor: assignee.color || "var(--primary)" }}
+                  className="w-5.5 h-5.5 rounded-full border-2 border-[var(--card-bg)] flex items-center justify-center text-[9px] font-extrabold text-white uppercase shrink-0"
+                >
+                  {assignee.initials}
+                </div>
+              ))
+            ) : (
+              <div 
+                title="Sem responsável designado"
+                className="w-5.5 h-5.5 rounded-full border border-[var(--card-border)] bg-[var(--column-bg)] flex items-center justify-center text-[9px] text-[var(--foreground)]/50 shrink-0"
+              >
+                <User className="w-3 h-3" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </article>
@@ -572,16 +660,16 @@ function CardSkeleton() {
       {[1, 2].map((i) => (
         <div 
           key={i} 
-          className="bg-[#111420]/50 border border-slate-900 rounded-xl p-5 space-y-4 animate-pulse"
+          className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-5 space-y-4 animate-pulse shadow-sm"
         >
-          <div className="h-4 bg-slate-800 rounded w-1/3"></div>
+          <div className="h-4 bg-[var(--column-border)] rounded w-1/3"></div>
           <div className="space-y-2">
-            <div className="h-3 bg-slate-800 rounded w-full"></div>
-            <div className="h-3 bg-slate-800 rounded w-5/6"></div>
+            <div className="h-3 bg-[var(--column-border)] rounded w-full"></div>
+            <div className="h-3 bg-[var(--column-border)] rounded w-5/6"></div>
           </div>
-          <div className="pt-3 border-t border-slate-900/60 flex justify-between items-center">
-            <div className="h-3 bg-slate-800 rounded w-1/4"></div>
-            <div className="w-6 h-6 rounded-full bg-slate-800"></div>
+          <div className="pt-3 border-t border-[var(--card-border)] flex justify-between items-center">
+            <div className="h-3 bg-[var(--column-border)] rounded w-1/4"></div>
+            <div className="w-6 h-6 rounded-full bg-[var(--column-border)]"></div>
           </div>
         </div>
       ))}
@@ -592,12 +680,12 @@ function CardSkeleton() {
 /* COMPONENTE: ESTADO DE COLUNA VAZIA */
 function EmptyState() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center py-10 px-4 border border-dashed border-slate-800 rounded-xl bg-slate-950/10">
-      <ListTodo className="w-8 h-8 text-slate-600 mb-2.5" />
-      <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">
+    <div className="flex-1 flex flex-col items-center justify-center py-10 px-4 border border-dashed border-[var(--card-border)] rounded-xl bg-[var(--column-bg)]/20">
+      <ListTodo className="w-8 h-8 text-[var(--foreground)]/30 mb-2.5" />
+      <p className="text-[var(--foreground)]/70 text-xs font-semibold uppercase tracking-wider">
         Sem Tarefas
       </p>
-      <p className="text-slate-500 text-[11px] text-center mt-1 max-w-[200px]">
+      <p className="text-[var(--foreground)]/40 text-[11px] text-center mt-1 max-w-[200px]">
         Nenhuma demanda corresponde aos filtros ativos nesta coluna.
       </p>
     </div>
@@ -624,21 +712,21 @@ function formatDueDate(timestampStr: string | null, statusColumn: "todo" | "doin
   const dateFormatted = dueDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
   if (statusColumn === "done") {
-    return { text: `Prazo: ${dateFormatted}`, colorClass: "text-slate-500 bg-slate-900 border-slate-800/80" };
+    return { text: `Prazo: ${dateFormatted}`, colorClass: "text-[var(--foreground)]/60 bg-[var(--column-bg)] border-[var(--card-border)]" };
   }
 
   if (diffDays < 0) {
     const absoluteDays = Math.abs(diffDays);
     return { 
       text: `Atrasada há ${absoluteDays} ${absoluteDays === 1 ? "dia" : "dias"} (${dateFormatted})`, 
-      colorClass: "text-red-400 bg-red-950/30 border-red-500/25 animate-pulse" 
+      colorClass: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-500/25 animate-pulse" 
     };
   }
   if (diffDays === 0) {
-    return { text: `Vence Hoje (${dateFormatted})`, colorClass: "text-amber-400 bg-amber-950/30 border-amber-500/30 font-bold" };
+    return { text: `Vence Hoje (${dateFormatted})`, colorClass: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-500/30 font-bold" };
   }
   if (diffDays === 1) {
-    return { text: `Vence Amanhã (${dateFormatted})`, colorClass: "text-indigo-400 bg-indigo-950/30 border-indigo-500/20" };
+    return { text: `Vence Amanhã (${dateFormatted})`, colorClass: "text-[var(--primary)] bg-[var(--primary-glow)] border-[var(--primary)]/20" };
   }
-  return { text: `Vence em ${diffDays} dias (${dateFormatted})`, colorClass: "text-slate-400 bg-slate-900 border-slate-800/80" };
+  return { text: `Vence em ${diffDays} dias (${dateFormatted})`, colorClass: "text-[var(--foreground)]/60 bg-[var(--column-bg)] border-[var(--card-border)]" };
 }
