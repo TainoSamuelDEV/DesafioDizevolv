@@ -1,4 +1,4 @@
-# 🌌 Project Pulse — Dashboard Executivo para Lideranças
+# 🟠 Project Pulse — Dashboard Executivo para Lideranças (Desafio Dizevolv)
 
 O **Project Pulse** é um Dashboard Executivo de alto padrão visual desenvolvido sob medida para lideranças e gestores da **Dizevolv Tech**. Ele consolida dados de saúde operacional da empresa integrados à API oficial do **ClickUp**, permitindo a identificação imediata de gargalos produtivos e demandas paradas por meio de um motor inteligente de cálculo de criticidade em tempo real.
 
