@@ -120,6 +120,12 @@ No cabeçalho do painel, os gestores contam com uma visão estatística resumida
 - **Gargalos Críticos** identificados e estagnados.
 - **Percentual Geral de Conclusão da Sprint**, acoplado a uma barra de progresso horizontal moderna que atualiza dinamicamente de acordo com as entregas.
 
+### 🧩 7. Integração & Acordeão de Subtarefas
+O dashboard agora suporta o desdobramento de demandas complexas em subtarefas:
+- **Agrupamento Automático:** O Backend BFF busca tanto tarefas quanto subtarefas de forma simultânea via API do ClickUp (`&subtasks=true`), organizando as subtasks dentro de seus respectivos cartões-pai antes de enviar ao frontend.
+- **Visualização Condicional Expandida:** Cartões com subtarefas exibem uma seção expansível com ícone de camadas e um contador. Ao clicar no cartão (ou no botão expansor), a seção se abre com uma animação elegante.
+- **Detalhes Completos:** Exibe o título de cada subtarefa com indicador visual de status concluído ou não (ícone e tachado) e sua respectiva prioridade mapeada e colorida.
+
 ---
 
 ## ⚡ A Engine do Motor de Criticidade (`status_critico`)

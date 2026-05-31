@@ -155,14 +155,14 @@ app.get('/api/tasks', async (req, res) => {
       console.log('🔄 [Pulse BFF API] Ignorando cache por solicitação do cliente (bypassCache=true).');
     }
 
-    // Faz a consulta paralela ao List Details e às Tasks do ClickUp
-    console.log('🌐 [Pulse BFF API] Consultando API oficial do ClickUp em paralelo (List Details + Tasks)...');
+    // Faz a consulta paralela ao List Details e às Tasks do ClickUp (incluindo subtasks)
+    console.log('🌐 [Pulse BFF API] Consultando API oficial do ClickUp em paralelo (List Details + Tasks com subtasks)...');
     
     const [listResponse, tasksResponse] = await Promise.all([
       axios.get(`https://api.clickup.com/api/v2/list/${cleanListId}`, {
         headers: { 'Authorization': cleanToken }
       }),
-      axios.get(`https://api.clickup.com/api/v2/list/${cleanListId}/task?include_closed=true`, {
+      axios.get(`https://api.clickup.com/api/v2/list/${cleanListId}/task?include_closed=true&subtasks=true`, {
         headers: { 'Authorization': cleanToken }
       })
     ]);
@@ -179,7 +179,45 @@ app.get('/api/tasks', async (req, res) => {
     };
 
     const rawTasks = tasksResponse.data.tasks || [];
-    const processedTasks = processTaskCriticism(rawTasks);
+    
+    // Agrupamento Inteligente de Subtasks sob tarefas-pai
+    const taskMap = {};
+    rawTasks.forEach(task => {
+      taskMap[task.id] = {
+        ...task,
+        subtasks: task.subtasks ? [...task.subtasks] : []
+      };
+    });
+
+    const topLevelTasks = [];
+    rawTasks.forEach(task => {
+      const mappedTask = taskMap[task.id];
+      const parentId = task.parent && (typeof task.parent === 'string' ? task.parent : task.parent.id);
+      
+      if (parentId && taskMap[parentId]) {
+        // Evita duplicar na inserção
+        const alreadyExists = taskMap[parentId].subtasks.some(sub => sub.id === mappedTask.id);
+        if (!alreadyExists) {
+          taskMap[parentId].subtasks.push(mappedTask);
+        }
+      } else {
+        topLevelTasks.push(mappedTask);
+      }
+    });
+
+    // Pós-processamento de Desduplicação Definitiva por ID
+    Object.values(taskMap).forEach(task => {
+      if (task.subtasks && task.subtasks.length > 0) {
+        const seen = new Set();
+        task.subtasks = task.subtasks.filter(sub => {
+          if (!sub || !sub.id || seen.has(sub.id)) return false;
+          seen.add(sub.id);
+          return true;
+        });
+      }
+    });
+
+    const processedTasks = processTaskCriticism(topLevelTasks);
 
     const payloadToCache = {
       listDetails,

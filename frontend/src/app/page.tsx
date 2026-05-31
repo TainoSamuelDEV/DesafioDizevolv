@@ -15,7 +15,8 @@ import {
   HelpCircle,
   Database,
   Sun,
-  Moon
+  Moon,
+  ChevronDown
 } from "lucide-react";
 
 interface Assignee {
@@ -49,6 +50,7 @@ interface Task {
     isStagnant: boolean;
     diasSemAtualizar: number;
   };
+  subtasks?: Task[];
 }
 
 interface StatusColor {
@@ -557,10 +559,24 @@ function TaskCard({
 }) {
   const isDone = column === "done";
   const isCritical = task.status_critico && !isDone;
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.interactive-avatar') || target.closest('button') || target.closest('a')) {
+      return;
+    }
+    if (task.subtasks && task.subtasks.length > 0) {
+      setIsExpanded(prev => !prev);
+    }
+  };
 
   return (
     <article 
-      className={`relative rounded-xl transition-all duration-200 hover:scale-[1.01] custom-shadow hover:shadow-md cursor-grab group overflow-hidden ${
+      onClick={handleCardClick}
+      className={`relative rounded-xl transition-all duration-200 hover:scale-[1.01] custom-shadow hover:shadow-md group overflow-hidden ${
+        task.subtasks && task.subtasks.length > 0 ? "cursor-pointer" : "cursor-grab"
+      } ${
         isDone ? "opacity-70 grayscale-[0.3]" : ""
       } ${
         isCritical 
@@ -629,6 +645,65 @@ function TaskCard({
             );
           })()}
         </div>
+
+        {/* Accordion / Seção Expandida para Subtarefas */}
+        {task.subtasks && task.subtasks.length > 0 && (
+          <div className="mt-1 pt-3 border-t border-[var(--card-border)] mb-3">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(prev => !prev);
+              }}
+              className="flex items-center justify-between w-full text-[11px] font-bold text-[var(--foreground)]/70 hover:text-[var(--primary)] transition cursor-pointer"
+            >
+              <div className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[var(--primary)]" />
+                <span>Subtarefas ({task.subtasks.length})</span>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div 
+              className={`grid transition-all duration-300 ease-in-out ${
+                isExpanded ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0 mt-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <ul className="space-y-2 max-h-48 overflow-y-auto pr-1 py-1">
+                  {task.subtasks.map(sub => {
+                    const isSubDone = isSubtaskCompleted(sub.status.status);
+                    const subPriority = formatPriority(sub.priority);
+                    return (
+                      <li 
+                        key={sub.id} 
+                        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 rounded-lg bg-[var(--column-bg)] border border-[var(--card-border)] gap-2 text-[10px] ${
+                          isSubDone ? 'opacity-65' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 max-w-[70%]">
+                          <CheckCircle 
+                            className={`w-3.5 h-3.5 shrink-0 ${
+                              isSubDone ? 'text-emerald-500 fill-emerald-500/10' : 'text-[var(--foreground)]/30'
+                            }`} 
+                          />
+                          <span className={`font-semibold line-clamp-2 ${isSubDone ? 'line-through text-[var(--foreground)]/50' : 'text-[var(--foreground)]'}`}>
+                            {sub.name}
+                          </span>
+                        </div>
+                        
+                        {subPriority && (
+                          <span className={`px-2 py-0.5 rounded-md font-bold shrink-0 border text-[9px] ${subPriority.colorClass}`}>
+                            {subPriority.text.replace("Prioridade: ", "")}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Rodapé do Card */}
         <div className="flex items-center justify-between pt-3.5 border-t border-[var(--card-border)] gap-3 mt-auto">
@@ -779,3 +854,17 @@ function formatPriority(priorityObj: Priority | null) {
     colorClass: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 font-bold"
   };
 }
+
+/* FUNÇÃO AUXILIAR: VERIFICA SE O STATUS DA SUBTAREFA INDICA CONCLUSÃO */
+const isSubtaskCompleted = (statusName: string): boolean => {
+  if (!statusName) return false;
+  const status = statusName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+  return (
+    status.includes("done") || 
+    status.includes("complete") || 
+    status.includes("concluido") || 
+    status.includes("finalizado") || 
+    status.includes("entregue") ||
+    status.includes("feito")
+  );
+};

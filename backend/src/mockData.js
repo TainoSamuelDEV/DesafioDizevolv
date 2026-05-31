@@ -33,7 +33,45 @@ const mockTasks = [
         color: "#7b68ee"
       }
     ],
-    description: "Identificar query bottlenecks na tabela de faturamento executiva."
+    description: "Identificar query bottlenecks na tabela de faturamento executiva.",
+    subtasks: [
+      {
+        id: "subtask-001-a",
+        name: "Mapear queries lentas com explain plan",
+        status: {
+          status: "complete",
+          color: "#2ea52e"
+        },
+        priority: {
+          priority: "high",
+          color: "#ffcc00"
+        }
+      },
+      {
+        id: "subtask-001-b",
+        name: "Adicionar índices secundários compostos",
+        status: {
+          status: "in progress",
+          color: "#ffc800"
+        },
+        priority: {
+          priority: "urgent",
+          color: "#f50000"
+        }
+      },
+      {
+        id: "subtask-001-c",
+        name: "Testar com massa de 1 milhão de registros",
+        status: {
+          status: "to do",
+          color: "#d3d3d3"
+        },
+        priority: {
+          priority: "normal",
+          color: "#00bfff"
+        }
+      }
+    ]
   },
   {
     id: "task-002",
@@ -58,7 +96,33 @@ const mockTasks = [
         color: "#34a853"
       }
     ],
-    description: "Homologar as chaves de sandbox do Stripe para a assinatura Pulse."
+    description: "Homologar as chaves de sandbox do Stripe para a assinatura Pulse.",
+    subtasks: [
+      {
+        id: "subtask-002-a",
+        name: "Configurar webhooks de notificação de pagamento",
+        status: {
+          status: "complete",
+          color: "#2ea52e"
+        },
+        priority: {
+          priority: "high",
+          color: "#ffcc00"
+        }
+      },
+      {
+        id: "subtask-002-b",
+        name: "Desenhar fluxos de estorno e cancelamento",
+        status: {
+          status: "to do",
+          color: "#d3d3d3"
+        },
+        priority: {
+          priority: "low",
+          color: "#808080"
+        }
+      }
+    ]
   },
   {
     id: "task-003",
