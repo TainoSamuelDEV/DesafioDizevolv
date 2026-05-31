@@ -31,20 +31,19 @@ export default function PitchDeck() {
 
   const slides: SlideData[] = [
     {
-      badge: "MÉTODO DIZE",
+      badge: "MÉTODO",
       title: "Project Pulse",
       subtitle: "A Saúde Operacional da sua Empresa em Tempo Real",
       icon: <Sparkles className="w-12 h-12 text-[#FD520A] animate-pulse" />,
       bullets: [
         "Dashboard Executivo de Alta Fidelidade visual projetado sob medida.",
-        "Desenvolvido em conformidade aos 4 pilares: Discovery ➡️ Scrum ➡️ CTO as a Service ➡️ Review.",
-        "Interface premium baseada no conceito Phoenix Flow da Dizevolv Tech.",
+        "Desenvolvido em 4 pilares: Discovery ➡️ Define ➡️ Develop ➡️ Deliver.",
         "Informação instantânea e inteligência consultiva para diretores e CTOs."
       ],
       accentText: "A Dizevolv Tech transforma a frustração corporativa em software de alta performance."
     },
     {
-      badge: "DIAGNÓSTICO (DISCOVERY)",
+      badge: "1. DISCOVERY",
       title: "O Gargalo Oculto",
       subtitle: "As Dores Silenciosas da Gestão de Demandas",
       icon: <Layers className="w-12 h-12 text-[#FD520A]" />,
@@ -57,7 +56,7 @@ export default function PitchDeck() {
       accentText: "A dor do negócio mapeada e tratada de forma cirúrgica antes de iniciar o código."
     },
     {
-      badge: "SOLUÇÃO (SCRUM)",
+      badge: "2. DEFINE",
       title: "Project Pulse Dashboard",
       subtitle: "Fluidez Visual com o Design Phoenix Flow",
       icon: <Cpu className="w-12 h-12 text-[#FD520A]" />,
@@ -70,7 +69,7 @@ export default function PitchDeck() {
       accentText: "Inteligência, elegância corporativa e usabilidade de alto contraste em um único lugar."
     },
     {
-      badge: "ENGENHARIA E SEGURANÇA",
+      badge: "3. DEVELOP",
       title: "Arquitetura Segura BFF",
       subtitle: "Blindagem e Resiliência sob Padrão BFF (Express.js)",
       icon: <Lock className="w-12 h-12 text-[#FD520A]" />,
@@ -83,7 +82,7 @@ export default function PitchDeck() {
       accentText: "Conectividade segura com ClickUp API e estabilidade robusta sob qualquer escala de dados."
     },
     {
-      badge: "REFINAMENTOS PREMIUM",
+      badge: "4. DELIVER",
       title: "Micro-interações de Alta Fidelidade",
       subtitle: "A Diferença de Soluções com Valor de Marca",
       icon: <Zap className="w-12 h-12 text-[#FD520A]" />,
@@ -97,7 +96,7 @@ export default function PitchDeck() {
       accentText: "Uma experiência de usuário que gera orgulho e destaca o software de soluções comuns de mercado."
     },
     {
-      badge: "CTO AS A SERVICE (FUTURO)",
+      badge: "PRÓXIMOS PASSOS",
       title: "Próximos Passos de Escala",
       subtitle: "Acelerando e Escalando a Performance Operacional",
       icon: <Play className="w-12 h-12 text-[#FD520A]" />,
