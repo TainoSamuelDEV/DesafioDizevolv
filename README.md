@@ -1,100 +1,141 @@
-# Project Pulse — Dashboard Executivo Executivo para Lideranças
+# 🌌 Project Pulse — Dashboard Executivo para Lideranças
 
-O **Project Pulse** é um Dashboard Executivo desenvolvido sob medida para as lideranças e gestores da Dizevolv Tech. Ele consolida dados de saúde operacional da empresa integrados à API oficial do **ClickUp**, permitindo a identificação imediata de gargalos produtivos e demandas paradas através de um motor inteligente de cálculo de criticidade.
+O **Project Pulse** é um Dashboard Executivo de alto padrão visual desenvolvido sob medida para lideranças e gestores da **Dizevolv Tech**. Ele consolida dados de saúde operacional da empresa integrados à API oficial do **ClickUp**, permitindo a identificação imediata de gargalos produtivos e demandas paradas por meio de um motor inteligente de cálculo de criticidade em tempo real.
 
-Este projeto adota o **Método DIZE** (Diagnosticar, Intervir, Zipar, Escalar) e utiliza o padrão arquitetural de **BFF (Backend For Frontend)**.
-
----
-
-## 🏗️ Arquitetura Geral (BFF Pattern)
-
-A aplicação foi estruturada em duas partes desacopladas:
-
-1. **Frontend (`/frontend`):** Interface executiva de alta fidelidade visual desenvolvida com **Next.js (App Router)**, **TypeScript** e **Tailwind CSS**. É focada estritamente em renderização rápida, UI/UX premium (Dark Mode padrão, micro-animações, estados de Skeleton Screen) e filtros dinâmicos.
-2. **Backend BFF (`/backend`):** Servidor **Express** seguro que orquestra as consultas ao ClickUp, gerencia credenciais de forma segura (sem vazamentos para o cliente), aplica uma camada de cache temporária de 5 minutos (mitigando *Rate Limits*) e executa o processamento da inteligência de dados.
-
-### A Engine de Criticidade (`status_critico`)
-O servidor BFF processa as demandas em tempo real e injeta o campo booleano `status_critico: true` se a tarefa satisfizer qualquer uma das condições:
-* A prioridade da tarefa for estritamente **"urgent"**.
-* A data de última atualização (`date_updated`) indicar inatividade/estagnação há **mais de 3 dias** em comparação ao momento da requisição (`Date.now() - date_updated > 259.200.000 ms`).
+O projeto adota o **Método DIZE** (*Diagnosticar, Intervir, Zipar, Escalar*) e utiliza o padrão arquitetural de **BFF (Backend For Frontend)**.
 
 ---
 
-## 🛠️ Configuração e Inicialização Local
+## 🏗️ Arquitetura Geral & Tecnologias
 
-Você pode inicializar e rodar o projeto de duas formas: usando o **Orquestrador Rápido (Recomendado)** diretamente da raiz ou fazendo a inicialização manual pasta por pasta.
+A aplicação é dividida em dois microsserviços desacoplados e otimizados:
 
-### Requisitos Prévios
-* **Node.js** (versão 18.0 ou superior instalada)
-* **npm** (gerenciador de pacotes padrão)
+1. **Frontend (`/frontend`):** 
+   - **Framework:** Next.js 14 (App Router) + TypeScript.
+   - **Styling:** Tailwind CSS integrado a variáveis CSS puras e dinâmicas.
+   - **UI/UX Premium:** Design de alta fidelidade com visual translúcido (*glassmorphic*), micro-animações, estados de carregamento elegantes (*Skeleton Screens*), modo escuro sob demanda e adaptabilidade de cores nativas do ClickUp.
+2. **Backend BFF (`/backend`):** 
+   - **Framework:** Node.js puro com **Express.js**.
+   - **Segurança:** Isolação completa de tokens de API. Nenhuma chave do ClickUp é exposta ao cliente final.
+   - **Performance:** Camada de cache em memória temporária de 5 minutos, reduzindo drasticamente o consumo de cotas de API e mitigando bloqueios por *Rate Limits*.
+   - **Modo Auto-Resiliente (Mock):** Fallback automático inteligente para dados mockados caso as chaves de API não estejam configuradas no ambiente.
 
 ---
 
-### Método 1: Orquestrador Rápido (Recomendado)
+## 🚀 Como Rodar o Projeto Localmente
 
-Criamos um gerenciador de scripts na raiz do projeto para rodar tudo com comandos únicos, sem precisar abrir múltiplos terminais ou gerenciar pastas:
+O repositório possui um **Orquestrador de Comandos na Raiz**, permitindo gerenciar todo o ecossistema com comandos únicos.
 
-1. **Instalar dependências de ambos os projetos (BFF + Frontend):**
-   Rode na raiz do projeto (`/`):
+### Pré-requisitos
+- **Node.js** (versão 18.0 ou superior instalada)
+- **npm** (gerenciador de pacotes padrão)
+
+---
+
+### Método A: Orquestrador Rápido (Recomendado)
+
+Rode tudo a partir da raiz do repositório, em um único terminal:
+
+1. **Instalar dependências de todos os serviços (Frontend + Backend):**
    ```bash
    npm run install:all
    ```
 
 2. **Configurar as Variáveis de Ambiente:**
-   Vá até a pasta `backend/` e crie o arquivo `.env` seguindo o modelo abaixo (deixe as chaves do ClickUp vazias para usar o **Modo Mock automático** out-of-the-box):
+   Crie um arquivo `.env` dentro da pasta `backend/` baseando-se no arquivo `.env.example` (ou use a estrutura descrita abaixo).
+   
+   *Dica:* Deixe as chaves do ClickUp em branco se quiser testar a aplicação de imediato usando o **Modo Mock automático**.
    ```env
    PORT=3001
-   CLICKUP_API_TOKEN=
-   CLICKUP_LIST_ID=
+   CLICKUP_API_TOKEN=seu_personal_token_aqui
+   CLICKUP_LIST_ID=seu_list_id_aqui
    ```
 
-3. **Subir ambas as aplicações simultaneamente:**
-   Rode na raiz do projeto (`/`):
+3. **Executar a aplicação em modo desenvolvimento:**
    ```bash
    npm run dev
    ```
-   > ⚡ Este comando utilizará o utilitário `concurrently` para inicializar de forma paralela e em tempo real o **Backend BFF** (em http://localhost:3001) e o **Frontend Next.js** (em http://localhost:3000).
+   > ⚡ Este comando utiliza o utilitário `concurrently` para subir simultaneamente o **Backend BFF** (na porta `3001`) e o **Frontend Next.js** (na porta `3000`) com logs unificados e coloridos.
 
 ---
 
-### Método 2: Inicialização Manual (Pasta por Pasta)
+### Método B: Inicialização Manual (Separada)
 
-Caso prefira gerenciar cada serviço individualmente em terminais dedicados:
+Caso prefira monitorar cada processo separadamente:
 
-#### Passo 1: Inicializar o Backend BFF
-1. Entre na pasta do backend:
-   ```bash
-   cd backend
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Crie o arquivo `.env` na raiz do diretório `backend/` com a sua porta e chaves do ClickUp.
-4. Inicie o servidor:
-   ```bash
-   npm run dev
-   ```
+#### Passo 1: Inicializar o Backend
+```bash
+cd backend
+npm install
+# Crie o arquivo .env conforme o modelo acima
+npm run dev
+```
 
-#### Passo 2: Inicializar o Frontend Next.js
-1. Em um novo terminal, entre na pasta do frontend:
-   ```bash
-   cd frontend
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Inicie o servidor Next.js:
-   ```bash
-   npm run dev
-   ```
-4. Acesse o painel em: [http://localhost:3000](http://localhost:3000).
+#### Passo 2: Inicializar o Frontend
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+Acesse o painel em seu navegador: **[http://localhost:3000](http://localhost:3000)**.
 
 ---
 
-## 🎨 Destaques Visuais Premium da UI
-* **Kanban Executivo:** Divisão em 3 colunas organizadas e dinâmicas (**To Do**, **Doing** e **Done**) com normalização automática de status nativos do ClickUp.
-* **Alerta Visual Agressivo:** Cards identificados como críticos (`status_critico === true`) recebem uma borda vermelha vibrante e pulsante (`critical-card-glow`), um badge contendo a justificativa de atraso/urgência e ícones de atenção Lucide.
-* **Métricas Gerais no Topo:** Um bloco de resumo numérico dinâmico contendo o *Total de Demandas*, *Gargalos Críticos* e *Demandas Concluídas* (com cálculo percentual de entrega da sprint).
-* **Filtros Ágeis:** Busque instantaneamente por palavras-chaves de tarefas ou selecione membros específicos responsáveis pelo trabalho.
+## 🎨 Destaques Visuais Premium & Design System
+
+A interface do **Project Pulse** foi reprojetada do zero sob o design system **Phoenix Flow** para garantir elegância corporativa, altíssimo contraste e micro-interações vivas:
+
+### 🌟 1. Customização Rápida de Marca (Brand Color)
+A paleta de cores primária e secundária da aplicação foi totalmente abstraída em variáveis nativas do CSS no arquivo [globals.css](file:///c:/Users/Admin/Documents/Dizevolv/frontend/src/app/globals.css):
+```css
+:root {
+  --primary: #FD520A;          /* Laranja vibrante tech padrão */
+  --primary-hover: #FD520A;
+  --primary-glow: rgba(253, 82, 10, 0.08);
+}
+```
+Isso permite mudar o tom da marca (como botões, ícones, badges e progressos) em um único ponto do CSS global.
+
+### 🌗 2. Dark Mode Nativo sem Conflitos de Sistema
+Para evitar o bug comum do Tailwind v4 em que preferências do sistema operacional estragam o contraste no modo claro, foi configurada uma variante customizada no topo do CSS global:
+```css
+@custom-variant dark (&:where(.dark, .dark *));
+```
+Esta configuração garante um controle de cores rigoroso, resultando em um fundo preto premium (`#111111`) e cards escuros de alta distinção (`#222222` com bordas `#323233`) que anulam qualquer opacidade ou texto ilegível.
+
+### 🧪 3. Colunas de Kanban Translúcidas (*Glassmorphism*)
+Cada status de coluna (**To Do**, **Doing** e **Done**) recebeu um aspecto de vidro jateado moderno com blur de fundo e transparência refinada (`backdrop-blur-md` e fundos HSL/RGB translúcidos), mantendo os cards suspensos no espaço de trabalho com profundidade tridimensional.
+
+### 🔴 4. Border-Spin Glow em Demandas Críticas
+As tarefas categorizadas com `status_critico === true` recebem um tratamento de urgência ativo e dinâmico:
+- Um gradiente cônico em rotação contínua ao redor do perímetro do card (`conic-gradient` + animação `spin` infinita de 2 segundos).
+- O efeito de borda brilhante e o neon vermelho são **desativados automaticamente** quando a demanda é movida para a coluna **Concluído (Done)**, indicando que o gargalo foi devidamente solucionado.
+
+### 📊 5. Sincronização Dinâmica de Cores do ClickUp
+Tanto os marcadores de seção de cada coluna quanto os elementos da listagem (incluindo o progresso de subtarefas e indicadores internos de cartões detalhados) herdam **em tempo real** a cor original configurada para aquele status dentro do ClickUp.
+
+### 📈 6. Bloco Executivo e Barra de Progresso Real-time
+No cabeçalho do painel, os gestores contam com uma visão estatística resumida:
+- **Total de Demandas** em andamento.
+- **Gargalos Críticos** identificados e estagnados.
+- **Percentual Geral de Conclusão da Sprint**, acoplado a uma barra de progresso horizontal moderna que atualiza dinamicamente de acordo com as entregas.
+
+---
+
+## ⚡ A Engine do Motor de Criticidade (`status_critico`)
+
+Para auxiliar na tomada de decisão estratégica de forma direta, o Backend BFF analisa as tarefas retornadas do ClickUp e injeta o campo `status_critico = true` de forma automatizada caso cumpra qualquer uma das regras:
+
+1. **Urgência Crítica:** A prioridade da tarefa é estritamente **"urgent"**.
+2. **Estagnação Operacional:** A propriedade `date_updated` indica que a tarefa está **sem modificações ou interações há mais de 3 dias** em relação à data atual do servidor (`Date.now() - date_updated > 259.200.000 ms`).
+
+Isso fornece um relatório instantâneo de quais demandas precisam de intervenção da liderança sem sobrecarregar o gestor com análises manuais de relatórios.
+
+---
+
+## 📄 Licença e Uso
+
+Este repositório é de uso interno da **Dizevolv Tech** e de seus parceiros de engenharia de software para o fomento de monitoramento operacional de alta performance.
+
+---
+*Desenvolvido com foco em UI/UX Premium, Agilidade de Entrega e Robusteza Arquitetural. ⚡*
