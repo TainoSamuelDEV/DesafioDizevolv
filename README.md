@@ -13,7 +13,7 @@ A aplicação é dividida em dois microsserviços desacoplados e otimizados:
 1. **Frontend (`/frontend`):** 
    - **Framework:** Next.js 14 (App Router) + TypeScript.
    - **Styling:** Tailwind CSS integrado a variáveis CSS puras e dinâmicas.
-   - **UI/UX Premium:** Design de alta fidelidade com visual translúcido (*glassmorphic*), micro-animações, estados de carregamento elegantes (*Skeleton Screens*), modo escuro sob demanda e adaptabilidade de cores nativas do ClickUp.
+   - **UI/UX Premium:** Design de alta fidelidade com visual translúcido (*glassmorphic*), micro-animações, estados de carregamento (*Skeleton Screens*), modo escuro sob demanda e adaptabilidade de cores nativas do ClickUp.
 2. **Backend (`/backend`):** 
    - **Framework:** Node.js puro com **Express.js**.
    - **Segurança:** Isolação completa de tokens de API. Nenhuma chave do ClickUp é exposta ao cliente final.
@@ -123,7 +123,7 @@ No cabeçalho do painel, os gestores contam com uma visão estatística resumida
 ### 🧩 7. Integração & Acordeão de Subtarefas
 O dashboard agora suporta o desdobramento de demandas complexas em subtarefas:
 - **Agrupamento Automático:** O Backend busca tanto tarefas quanto subtarefas de forma simultânea via API do ClickUp (`&subtasks=true`), organizando as subtasks dentro de seus respectivos cartões-pai antes de enviar ao frontend.
-- **Visualização Condicional Expandida:** Cartões com subtarefas exibem uma seção expansível com ícone de camadas e um contador. Ao clicar no cartão (ou no botão expansor), a seção se abre com uma animação elegante.
+- **Visualização Condicional Expandida:** Cartões com subtarefas exibem uma seção expansível com ícone de camadas e um contador. Ao clicar no cartão (ou no botão expansor), a seção se abre com uma animação suave.
 - **Detalhes Completos:** Exibe o título de cada subtarefa com indicador visual de status concluído ou não (ícone e tachado) e sua respectiva prioridade mapeada e colorida.
 
 ---
