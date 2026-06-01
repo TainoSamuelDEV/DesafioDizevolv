@@ -1,14 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const NodeCache = require('node-cache');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-// Configura cache local de 5 minutos (300 segundos TTL)
-const cache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
 
 app.use(cors());
 app.use(express.json());
@@ -21,7 +17,7 @@ const cleanToken = rawToken.replace(/["'\s]/g, '');
 let cleanListId = rawListId.replace(/["'\s]/g, '');
 
 // Extração inteligente de ID se o usuário colar a URL completa da lista
-// Exemplo: https://app.clickup.com/90171282270/v/li/901714184372
+// Exemplo: https://app.clickup.com/111111111111/v/li/111111111111
 if (cleanListId.includes('/li/')) {
   const parts = cleanListId.split('/li/');
   cleanListId = parts[parts.length - 1];
@@ -137,24 +133,6 @@ app.get('/api/tasks', async (req, res) => {
       });
     }
 
-    // Se estiver configurado, tenta buscar do Cache primeiro para evitar Rate Limiting
-    const bypassCache = req.query.bypassCache === 'true';
-    const cacheKey = `tasks_${cleanListId}`;
-    const cachedData = cache.get(cacheKey);
-    
-    if (cachedData && !bypassCache) {
-      console.log('📦 [Pulse BFF Cache] Retornando dados em cache da API do ClickUp.');
-      return res.json({
-        source: 'cache',
-        listDetails: cachedData.listDetails,
-        tasks: cachedData.tasks
-      });
-    }
-
-    if (bypassCache) {
-      console.log('🔄 [Pulse BFF API] Ignorando cache por solicitação do cliente (bypassCache=true).');
-    }
-
     // Faz a consulta paralela ao List Details e às Tasks do ClickUp (incluindo subtasks)
     console.log('🌐 [Pulse BFF API] Consultando API oficial do ClickUp em paralelo (List Details + Tasks com subtasks)...');
     
@@ -218,14 +196,6 @@ app.get('/api/tasks', async (req, res) => {
     });
 
     const processedTasks = processTaskCriticism(topLevelTasks);
-
-    const payloadToCache = {
-      listDetails,
-      tasks: processedTasks
-    };
-
-    // Salva no cache com TTL padrão (5 minutos)
-    cache.set(cacheKey, payloadToCache);
 
     return res.json({
       source: 'api',

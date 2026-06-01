@@ -58,15 +58,16 @@ export default function PitchDeck() {
     },
     {
       badge: "2. DEFINE",
-      title: "Project Pulse Dashboard",
-      subtitle: "Fluidez Visual",
+      title: "Project Pulse Solution",
+      subtitle: "Motor de Criticidade e Fluidez Visual",
       icon: <Cpu className="w-12 h-12 text-[#FD520A]" />,
       bullets: [
-        "Visual Glassmorphic: Colunas Kanban translúcidas com efeito jateado (backdrop-blur-md) de alta sofisticação.",
-        "Sprint Metrics Bar: Resumo numérico no topo (Tarefas, Gargalos, Entregues) e barra de progresso horizontal dinâmica.",
-        "Filtros Rápidos Executivos: Busca instantânea por título, descrição ou membro responsável designado."
+        "Visual Glassmorphic & Kanban: Colunas translúcidas (backdrop-blur-md) e cards de alto contraste para visibilidade total.",
+        "Sprint Metrics Bar: Resumo superior analítico de demandas totais, gargalos e barra de progresso horizontal em tempo real.",
+        "Motor de Criticidade Ativo (status_critico): Regra que sinaliza tarefas como gargalos se a prioridade for estritamente 'urgent' ou se estiverem sem modificações há mais de 3 dias.",
+        "Filtros Rápidos Executivos: Filtro de buscas instantâneo por título, descrição ou membro responsável para tomadas de decisão ágeis."
       ],
-      accentText: "Inteligência, elegância corporativa e usabilidade de alto contraste em um único lugar."
+      accentText: "Inteligência operacional e elegância executiva consolidadas no design system Phoenix Flow."
     },
     {
       badge: "3. DEVELOP",
@@ -76,7 +77,7 @@ export default function PitchDeck() {
       bullets: [
         "Proteção e Desempenho: Servidor Express centraliza o token de autenticação ClickUp.",
         "Primeira Consulta (Dados Estruturais): Busca as configurações da lista (GET /list/{id}) retornando os nomes do Espaço, Pasta/Projeto, Lista e Statuses configurados com suas cores originais.",
-        "Reflexo Estrutural na UI: O frontend consome esses dados dinâmicos e usa as cores nativas do ClickUp nos marcadores verticais e cabeçalhos de coluna.",
+        "Reflexo Estrutural na UI (Persistencia visual) : O frontend consome esses dados dinâmicos e usa as cores nativas do ClickUpnos marcadores verticais e cabeçalhos de coluna.",
         "Segunda Consulta (Dados Operacionais): Busca todas as demandas (GET /list/{id}/task?include_closed=true&subtasks=true) retornando nome, status, prioridade, prazos, responsáveis e descrição.",
         "Reflexo Operacional na UI: Distribui os cards nas colunas correspondentes do Kanban, calcula o progresso de entregas da sprint no topo, e popula a lista expansível de subtarefas."
       ],
@@ -85,29 +86,15 @@ export default function PitchDeck() {
     },
     {
       badge: "4. DELIVER",
-      title: "Entregáveis de Alta Fidelidade",
-      subtitle: "Solução Pronta, Segura e Escalável para Produção",
+      title: "Entregáveis",
+      subtitle: "Arquitetura BFF e Interface Executiva Premium",
       icon: <Zap className="w-12 h-12 text-[#FD520A]" />,
       bullets: [
-        "BFF Auto-Resiliente (Segurança & Cache): Servidor Express.js isola chaves privadas, provê cache de 5 minutos e desduplica requisições da API ClickUp.",
-        "Painel Executivo Phoenix Flow (UI/UX Premium): Kanban translúcido em glassmorphism com sincronização nativa de cores e progresso real-time.",
-        "Engenharia de Micro-Interações: Efeito Border-Spin Glow ativo em cards críticos (desativado na coluna Done) e Acordeão de Subtarefas com abertura suave por hardware.",
-        "Setup Sem Fricção (Zero Fricção): Inicialização mono-repositório instantânea com único comando (npm run dev) e fallback automático para Modo Mock."
+        "BFF Seguro & Encapsulamento: Servidor Node.js/Express centraliza o API Token privado da ClickUp. Segurança absoluta com vazamento zero de credenciais corporativas no cliente (frontend).",
+        "Motor de Criticidade Ativo (status_critico): Agregação lógica no servidor que varre e sinaliza demandas como gargalos se forem prioridade 'urgent' ou sem modificações há mais de 3 dias.",
+        "Interface: Dashboard executivo com barra de métricas em tempo real, acordeão de subtarefas com transições suaves e indicador visual dinâmico (Border-Spin Glow) para demandas em gargalo crítico."
       ],
-      accentText: "Uma entrega de engenharia robusta e de alta fidelidade visual, pronta para implantação imediata."
-    },
-    {
-      badge: "PRÓXIMOS PASSOS",
-      title: "Próximos Passos de Escala",
-      subtitle: "Acelerando e Escalando a Performance Operacional",
-      icon: <Play className="w-12 h-12 text-[#FD520A]" />,
-      bullets: [
-        "Alertas Ativos via n8n: Disparos automáticos no Slack sempre que uma tarefa ultrapassar 3 dias de inatividade.",
-        "Analytics Histórico: Gráficos de Lead Time e Cycle Time acumulados para análises estatísticas sazonais.",
-        "Discovery Custom Fields: Integração profunda com campos personalizados de horas estimadas e faturamento real.",
-        "Orquestrador de Sprints: Histórico de Sprints passadas comparado à atual para medir velocidade e previsibilidade."
-      ],
-      accentText: "Escalabilidade desenhada para apoiar decisões estratégicas e expandir o valor do negócio."
+      accentText: "A união de um backend seguro e performático com um frontend de altíssima fidelidade e usabilidade executiva."
     }
   ];
 
@@ -213,6 +200,30 @@ export default function PitchDeck() {
                   <div className="w-8 h-1 bg-[#FD520A] rounded-full"></div>
                   <p className="text-[11px] font-semibold text-white/80 italic leading-relaxed">
                     "{slide.accentText}"
+                  </p>
+                </div>
+              </div>
+            ) : currentSlide === slides.length - 1 ? (
+              <div className="w-full max-w-[340px] aspect-square rounded-2xl border border-[#FD520A]/30 bg-gradient-to-br from-[#FD520A]/5 to-[#FD520A]/[0.01] backdrop-blur-md p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-[#FD520A]/60 transition-all duration-300">
+                {/* Glow circular de fundo ativo */}
+                <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[80%] bg-[#FD520A]/[0.15] rounded-full blur-[50px] group-hover:bg-[#FD520A]/[0.25] transition-all duration-300"></div>
+
+                {/* Ícone */}
+                <div className="p-4 rounded-xl bg-[#FD520A]/10 border border-[#FD520A]/20 w-fit shadow-inner">
+                  {slide.icon}
+                </div>
+
+                {/* Accent Text e Botão de Ir para o Dashboard */}
+                <div className="space-y-4 relative z-10 w-full">
+                  <Link
+                    href="/"
+                    className="flex items-center justify-center gap-2 bg-[#FD520A] hover:bg-[#FD520A]/90 text-white font-black text-sm py-4 px-6 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(253,82,10,0.3)] hover:shadow-[0_0_30px_rgba(253,82,10,0.5)] cursor-pointer group/btn w-full"
+                  >
+                    <span>Ir para o Dashboard</span>
+                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
+                  <p className="text-[10px] text-center text-white/40 font-bold uppercase tracking-widest">
+                    Homologação Completa
                   </p>
                 </div>
               </div>

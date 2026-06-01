@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  ListTodo, 
-  Search, 
-  User, 
-  RefreshCw, 
-  Layers, 
-  Calendar, 
-  Clock, 
+import {
+  AlertTriangle,
+  CheckCircle,
+  ListTodo,
+  Search,
+  User,
+  RefreshCw,
+  Layers,
+  Calendar,
+  Clock,
   Info,
   HelpCircle,
   Database,
@@ -93,7 +93,7 @@ export default function Dashboard() {
   };
 
   // URL do BFF (Backend For Frontend) resolvida dinamicamente para evitar bloqueios de rede privada (PNA)
-  const [bffUrl, setBffUrl] = useState("http://localhost:3001");
+  const [bffUrl, setBffUrl] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -109,14 +109,16 @@ export default function Dashboard() {
 
   // Busca as tarefas ao inicializar ou ao forçar atualização
   useEffect(() => {
+    if (!bffUrl) return;
+
     async function fetchTasks() {
       setLoading(true);
       setError(null);
       try {
-        const fetchUrl = refreshTrigger > 0 
-          ? `${bffUrl}/api/tasks?bypassCache=true` 
+        const fetchUrl = refreshTrigger > 0
+          ? `${bffUrl}/api/tasks?bypassCache=true`
           : `${bffUrl}/api/tasks`;
-          
+
         const res = await fetch(fetchUrl);
         if (!res.ok) {
           throw new Error(`Servidor BFF retornou status ${res.status}`);
@@ -148,29 +150,29 @@ export default function Dashboard() {
       .replace(/[^a-z0-9]/g, "");
 
     if (
-      status.includes("todo") || 
-      status.includes("backlog") || 
-      status.includes("agendado") || 
-      status.includes("planejado") || 
+      status.includes("todo") ||
+      status.includes("backlog") ||
+      status.includes("agendado") ||
+      status.includes("planejado") ||
       status.includes("afazer") ||
       status.includes("pendente")
     ) {
       return "todo";
     }
     if (
-      status.includes("doing") || 
-      status.includes("progress") || 
-      status.includes("emprogresso") || 
-      status.includes("desenvolvimento") || 
+      status.includes("doing") ||
+      status.includes("progress") ||
+      status.includes("emprogresso") ||
+      status.includes("desenvolvimento") ||
       status.includes("execucao")
     ) {
       return "doing";
     }
     if (
-      status.includes("done") || 
-      status.includes("complete") || 
-      status.includes("concluido") || 
-      status.includes("finalizado") || 
+      status.includes("done") ||
+      status.includes("complete") ||
+      status.includes("concluido") ||
+      status.includes("finalizado") ||
       status.includes("entregue") ||
       status.includes("feito")
     ) {
@@ -214,10 +216,10 @@ export default function Dashboard() {
   // Filtra as tarefas baseando-se no texto de busca e no responsável selecionado
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
-      const matchText = 
-        task.name.toLowerCase().includes(filterText.toLowerCase()) || 
+      const matchText =
+        task.name.toLowerCase().includes(filterText.toLowerCase()) ||
         (task.description && task.description.toLowerCase().includes(filterText.toLowerCase()));
-      
+
       let matchAssignee = true;
       if (filterAssignee !== "all") {
         if (filterAssignee === "unassigned") {
@@ -236,7 +238,7 @@ export default function Dashboard() {
     const total = filteredTasks.length;
     const critical = filteredTasks.filter(t => t.status_critico).length;
     const completed = filteredTasks.filter(t => getNormalizedColumn(t.status.status) === "done").length;
-    
+
     return { total, critical, completed };
   }, [filteredTasks]);
 
@@ -257,11 +259,11 @@ export default function Dashboard() {
   const formatTimeAgo = (timestampStr: string) => {
     const timestamp = Number(timestampStr);
     if (isNaN(timestamp)) return "Data inválida";
-    
+
     const now = Date.now();
     const diffMs = now - timestamp;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays <= 0) {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       if (diffHours <= 0) return "Atualizado recentemente";
@@ -279,10 +281,10 @@ export default function Dashboard() {
       <header className="flex flex-col gap-6 mb-8 pb-6 border-b border-[var(--card-border)]">
         {/* Linha Superior: Logo e Botões */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <img src="dizevolv.svg" className="h-12 md:h-15 w-auto mt-2" alt="Dizevolv Logo" />
+          <img src="dizevolv.svg" className="h-10 md:h-12 w-auto mt-2" alt="Dizevolv Logo" />
 
           <div className="flex items-center gap-3 self-start sm:self-auto shrink-0">
-            <button 
+            <button
               onClick={toggleTheme}
               className="flex items-center justify-center p-2.5 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--foreground)] hover:bg-[var(--card-hover)] transition cursor-pointer shadow-md animate-none"
               title={theme === "light" ? "Mudar para modo escuro" : "Mudar para modo claro"}
@@ -294,13 +296,13 @@ export default function Dashboard() {
               )}
             </button>
 
-            <button 
+            <button
               onClick={() => setRefreshTrigger(prev => prev + 1)}
               disabled={loading}
               className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-slate-300 disabled:text-slate-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition duration-150 cursor-pointer shadow-md disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              Recarregar Painel
+              Atualizar dados
             </button>
           </div>
         </div>
@@ -308,15 +310,14 @@ export default function Dashboard() {
         {/* Linha Inferior: Breadcrumbs e Título do Painel */}
         <div>
           {/* Espaço / Pasta Hierarchy Breadcrumbs */}
-          <img 
-            src="clickup.svg" 
-            className={`h-12 md:h-4 w-auto mt-2 dark:brightness-0 dark:invert transition-all duration-500 ${
-              apiSource.startsWith("mock") ? "blur-[3px] opacity-60" : "blur-0 opacity-100"
-            }`} 
-            alt="ClickUp Logo" 
+          <img
+            src="clickup.svg"
+            className={`h-4 w-auto mt-2 dark:brightness-0 dark:invert transition-all duration-500 ${apiSource.startsWith("mock") ? "blur-[3px] opacity-60" : "blur-0 opacity-100"
+              }`}
+            alt="ClickUp Logo"
             title={apiSource.startsWith("mock") ? "Modo Simulação (ClickUp desconectado)" : "ClickUp Conectado (Live)"}
           />
-          
+
           <div className="flex items-center gap-1 text-[10px] font-extrabold text-[var(--primary)] uppercase tracking-wider mt-2">
             <span>{listDetails ? listDetails.space : "Dizevolv Tech"}</span>
             <span className="text-[var(--foreground)]/30 font-extrabold">/</span>
@@ -342,7 +343,7 @@ export default function Dashboard() {
               <p className="text-sm text-red-700 dark:text-red-300/90 mt-0.5">{error}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setRefreshTrigger(prev => prev + 1)}
             className="bg-red-600 hover:bg-red-700 dark:bg-red-900 dark:hover:bg-red-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"
           >
@@ -459,7 +460,7 @@ export default function Dashboard() {
           </select>
 
           {(filterText || filterAssignee !== "all") && (
-            <button 
+            <button
               onClick={() => {
                 setFilterText("");
                 setFilterAssignee("all");
@@ -548,12 +549,12 @@ export default function Dashboard() {
 }
 
 /* COMPONENTE: CARD DA TAREFA */
-function TaskCard({ 
-  task, 
-  formatTimeAgo, 
-  column 
-}: { 
-  task: Task; 
+function TaskCard({
+  task,
+  formatTimeAgo,
+  column
+}: {
+  task: Task;
   formatTimeAgo: (t: string) => string;
   column: "todo" | "doing" | "done";
 }) {
@@ -572,27 +573,24 @@ function TaskCard({
   };
 
   return (
-    <article 
+    <article
       onClick={handleCardClick}
-      className={`relative rounded-xl transition-all duration-200 hover:scale-[1.01] custom-shadow hover:shadow-md group overflow-hidden ${
-        task.subtasks && task.subtasks.length > 0 ? "cursor-pointer" : "cursor-grab"
-      } ${
-        isDone ? "opacity-70 grayscale-[0.3]" : ""
-      } ${
-        isCritical 
-          ? "p-[1.5px] bg-[var(--card-border)] critical-card-glow" 
+      className={`relative rounded-xl transition-all duration-200 hover:scale-[1.01] custom-shadow hover:shadow-md group overflow-hidden ${task.subtasks && task.subtasks.length > 0 ? "cursor-pointer" : "cursor-grab"
+        } ${isDone ? "opacity-70 grayscale-[0.3]" : ""
+        } ${isCritical
+          ? "p-[1.5px] bg-[var(--card-border)] critical-card-glow"
           : "border border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[var(--foreground)]/30 hover:bg-[var(--card-hover)] p-5"
-      }`}
+        }`}
     >
       {/* Elemento de Borda Rotativa Conic */}
       {isCritical && (
-        <div 
+        <div
           className="absolute inset-[-50%] bg-[conic-gradient(from_0deg,transparent_30%,#ef4444_50%,transparent_70%)] animate-[spin_2s_linear_infinite]"
         ></div>
       )}
 
       {/* Conteúdo Interno do Card */}
-      <div 
+      <div
         className={isCritical ? "relative bg-[var(--card-bg)] rounded-[11px] p-5 w-full h-full flex flex-col bg-gradient-to-br from-[var(--card-bg)] to-red-500/[0.03]" : "flex flex-col w-full h-full"}
       >
         {/* Badge Superior de Criticidade */}
@@ -600,8 +598,8 @@ function TaskCard({
           <div className="flex items-center gap-1 text-[10px] font-extrabold bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 px-2.5 py-1 rounded mb-3 uppercase tracking-wider w-fit">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
             <span>
-              {task.criticidade_detalhes?.isUrgent 
-                ? "Urgente" 
+              {task.criticidade_detalhes?.isUrgent
+                ? "Urgente"
                 : `Estagnado (${task.criticidade_detalhes?.diasSemAtualizar} dias)`}
             </span>
           </div>
@@ -649,7 +647,7 @@ function TaskCard({
         {/* Accordion / Seção Expandida para Subtarefas */}
         {task.subtasks && task.subtasks.length > 0 && (
           <div className="mt-1 pt-3 border-t border-[var(--card-border)] mb-3">
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(prev => !prev);
@@ -663,10 +661,9 @@ function TaskCard({
               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>
 
-            <div 
-              className={`grid transition-all duration-300 ease-in-out ${
-                isExpanded ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0 mt-0"
-              }`}
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0 mt-0"
+                }`}
             >
               <div className="overflow-hidden">
                 <ul className="space-y-2 max-h-48 overflow-y-auto pr-1 py-1">
@@ -674,23 +671,21 @@ function TaskCard({
                     const isSubDone = isSubtaskCompleted(sub.status.status);
                     const subPriority = formatPriority(sub.priority);
                     return (
-                      <li 
-                        key={sub.id} 
-                        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 rounded-lg bg-[var(--column-bg)] border border-[var(--card-border)] gap-2 text-[10px] ${
-                          isSubDone ? 'opacity-65' : ''
-                        }`}
+                      <li
+                        key={sub.id}
+                        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-2 rounded-lg bg-[var(--column-bg)] border border-[var(--card-border)] gap-2 text-[10px] ${isSubDone ? 'opacity-65' : ''
+                          }`}
                       >
                         <div className="flex items-center gap-2 max-w-[70%]">
-                          <CheckCircle 
-                            className={`w-3.5 h-3.5 shrink-0 ${
-                              isSubDone ? 'text-emerald-500 fill-emerald-500/10' : 'text-[var(--foreground)]/30'
-                            }`} 
+                          <CheckCircle
+                            className={`w-3.5 h-3.5 shrink-0 ${isSubDone ? 'text-emerald-500 fill-emerald-500/10' : 'text-[var(--foreground)]/30'
+                              }`}
                           />
                           <span className={`font-semibold line-clamp-2 ${isSubDone ? 'line-through text-[var(--foreground)]/50' : 'text-[var(--foreground)]'}`}>
                             {sub.name}
                           </span>
                         </div>
-                        
+
                         {subPriority && (
                           <span className={`px-2 py-0.5 rounded-md font-bold shrink-0 border text-[9px] ${subPriority.colorClass}`}>
                             {subPriority.text.replace("Prioridade: ", "")}
@@ -717,7 +712,7 @@ function TaskCard({
           <div className="flex items-center -space-x-1.5 overflow-hidden">
             {task.assignees && task.assignees.length > 0 ? (
               task.assignees.map(assignee => (
-                <div 
+                <div
                   key={assignee.id}
                   title={`Responsável: ${assignee.username}`}
                   style={{ backgroundColor: assignee.color || "var(--primary)" }}
@@ -727,7 +722,7 @@ function TaskCard({
                 </div>
               ))
             ) : (
-              <div 
+              <div
                 title="Sem responsável designado"
                 className="w-5.5 h-5.5 rounded-full border border-[var(--card-border)] bg-[var(--column-bg)] flex items-center justify-center text-[9px] text-[var(--foreground)]/50 shrink-0"
               >
@@ -746,8 +741,8 @@ function CardSkeleton() {
   return (
     <>
       {[1, 2].map((i) => (
-        <div 
-          key={i} 
+        <div
+          key={i}
           className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-5 space-y-4 animate-pulse shadow-sm"
         >
           <div className="h-4 bg-[var(--column-border)] rounded w-1/3"></div>
@@ -789,7 +784,7 @@ function formatDueDate(timestampStr: string | null, statusColumn: "todo" | "doin
   const now = Date.now();
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
-  
+
   const dueDate = new Date(timestamp);
   const dueDateClean = new Date(timestamp);
   dueDateClean.setHours(0, 0, 0, 0);
@@ -805,9 +800,9 @@ function formatDueDate(timestampStr: string | null, statusColumn: "todo" | "doin
 
   if (diffDays < 0) {
     const absoluteDays = Math.abs(diffDays);
-    return { 
-      text: `Atrasada há ${absoluteDays} ${absoluteDays === 1 ? "dia" : "dias"} (${dateFormatted})`, 
-      colorClass: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-500/25 animate-pulse" 
+    return {
+      text: `Atrasada há ${absoluteDays} ${absoluteDays === 1 ? "dia" : "dias"} (${dateFormatted})`,
+      colorClass: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-500/25 animate-pulse"
     };
   }
   if (diffDays === 0) {
@@ -823,7 +818,7 @@ function formatDueDate(timestampStr: string | null, statusColumn: "todo" | "doin
 function formatPriority(priorityObj: Priority | null) {
   if (!priorityObj) return null;
   const p = (priorityObj.priority || "").toLowerCase();
-  
+
   if (p === "urgent" || p === "urgente") {
     return {
       text: "Prioridade: Urgente",
@@ -848,7 +843,7 @@ function formatPriority(priorityObj: Priority | null) {
       colorClass: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 font-bold"
     };
   }
-  
+
   return {
     text: `Prioridade: ${priorityObj.priority}`,
     colorClass: "text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 font-bold"
@@ -860,10 +855,10 @@ const isSubtaskCompleted = (statusName: string): boolean => {
   if (!statusName) return false;
   const status = statusName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
   return (
-    status.includes("done") || 
-    status.includes("complete") || 
-    status.includes("concluido") || 
-    status.includes("finalizado") || 
+    status.includes("done") ||
+    status.includes("complete") ||
+    status.includes("concluido") ||
+    status.includes("finalizado") ||
     status.includes("entregue") ||
     status.includes("feito")
   );
